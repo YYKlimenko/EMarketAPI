@@ -49,7 +49,7 @@ class ImageService(RelativeService):
         return await self.create(creating_image, session=session)
 
     async def delete_image(self, image_id: int, session: AsyncGenerator = Depends(ASYNC_SESSION)) -> None:
-        if image := await self.retrieve_by_id(image_id):
+        if image := await self.retrieve_by_id(image_id, session=session):
             await ImageFileDeleter('media', image.url).delete()
             return await self.delete(image_id, session=session)
 
