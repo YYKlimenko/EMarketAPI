@@ -86,7 +86,6 @@ class UserService(Service):
         for attribute in ('username', 'number'):
             if locals().get(attribute):
                 data[attribute] = locals().get(attribute)
-        print(data)
         instance = update(self._model).where(self._model.id == user_id)
         instance = instance.values(**data)
         await session.execute(instance)
