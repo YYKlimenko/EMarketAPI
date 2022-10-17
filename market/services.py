@@ -2,16 +2,16 @@ from datetime import datetime
 from typing import AsyncGenerator
 
 from bcrypt import gensalt, hashpw
-from fastapi import UploadFile, Form, Depends, HTTPException, Path
+from fastapi import UploadFile, Form, Depends, HTTPException
 from sqlalchemy import update
 from sqlalchemy.exc import IntegrityError
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field
 
 from auth.models import CreatingUser, User, RetrievingUser
 from core.services.dataclasses import SignFloat
 from core.settings import get_async_session as ASYNC_SESSION
 from core.services.services import Service, RelativeService
-from market.image_manager import ImageFileUploader, ImageFileDeleter
+from market.utils.image_edit import ImageFileUploader, ImageFileDeleter
 from market.models import CreatingProductCategory, ProductCategory, Product, CreatingProduct, Image, CreatingImage, \
     CreatingOrder, Order
 
