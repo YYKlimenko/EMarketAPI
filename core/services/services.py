@@ -23,9 +23,10 @@ class ExistChecker:
 class ServiceMeta(type):
 
     @classmethod
-    def add_attributes(mcs, instance, attributes):
+    def add_attributes(mcs, instance, attributes, dct):
         for attribute in attributes:
-            setattr(instance, attribute.__name__, attribute)
+            if dct.get(attribute.__name__) is None:
+                setattr(instance, attribute.__name__, attribute)
 
     def __new__(mcs, name, bases, dct):
         class_instance = super().__new__(mcs, name, bases, dct)
@@ -64,7 +65,7 @@ class ServiceMeta(type):
         ) -> None:
             return await self.repository.edit(self._model, instance_id, session, data=None)
         mcs.add_attributes(
-            class_instance, (__init__, create, retrieve_by_id, update, delete)
+            class_instance, (__init__, create, retrieve_by_id, update, delete), dct
         )
 
         return class_instance
@@ -104,7 +105,7 @@ class FilterServiceMeta(ServiceMeta):
             kwargs = {key: kwargs[key] for key in kwargs if kwargs[key][0]}
             return await self.repository.retrieve_list(self._model, session, self._response_model, **kwargs)
 
-        mcs.add_attributes(class_instance, (retrieve_list, filter_kwargs))
+        mcs.add_attributes(class_instance, (retrieve_list, filter_kwargs), dct)
         return class_instance
 
 
@@ -135,7 +136,7 @@ class RelativeFilterServiceMeta(FilterServiceMeta):
                 session
             )
 
-        mcs.add_attributes(class_instance, (create, exist_checker))
+        mcs.add_attributes(class_instance, (create, exist_checker), dct)
         return class_instance
 
 
