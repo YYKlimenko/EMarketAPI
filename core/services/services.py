@@ -17,7 +17,7 @@ class ExistChecker:
 
     async def check(self, model: type, instance_id: int, session: AsyncSession) -> bool:
         return True if await self._repository.retrieve(
-            model, 'id', instance_id, session) else False
+            model, None, 'id', instance_id, session) else False
 
 
 class ServiceMeta(type):
@@ -125,12 +125,9 @@ class RelativeFilterServiceMeta(FilterServiceMeta):
                         getattr(instance, field),
                         session
                 ):
-                    nonexistent_field = (
-                        self._back_relative_fields[field].__name__
-                    )
                     raise HTTPException(
                         422,
-                        detail=f"{nonexistent_field} is not exists"
+                        detail=f'{self._back_relative_fields[field].__name__} is not exists'
                     )
             return await self.repository.create(
                 self._model,

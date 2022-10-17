@@ -41,7 +41,7 @@ class ImageService(RelativeService):
     async def create_image(
             self,
             file: UploadFile,
-            product_id: int = Form(..., alias='id'),
+            product_id: int = Form(..., alias='product_id'),
             session: AsyncGenerator = Depends(ASYNC_SESSION)
     ) -> None:
         url = await ImageFileUploader(file, str(product_id)).upload()
