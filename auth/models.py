@@ -2,7 +2,7 @@ from datetime import datetime
 from string import digits
 
 from pydantic import validator
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, SQLModel, Relationship
 
 
 class IDUser(SQLModel):
@@ -43,11 +43,13 @@ class CreatingUser(BaseUser, SQLModel):
 
 
 class RetrievingUser(BaseUser, IDUser):
-    __tablename__ = 'Users'
     date_registration: datetime = datetime.utcnow()
     is_admin: bool = False
 
 
 class User(RetrievingUser, table=True):
     __tablename__ = 'Users'
+
     hashed_password: str = Field(max_length=256)
+
+    orders: list['Order'] = Relationship(back_populates="user")

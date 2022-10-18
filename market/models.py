@@ -1,4 +1,4 @@
-from pydantic import condecimal
+from pydantic import condecimal, BaseModel
 from sqlmodel import SQLModel, Field, Relationship
 
 
@@ -36,7 +36,9 @@ class CreatingProduct(SQLModel):
 class Product(CreatingProduct, ID, table=True):
     __tablename__ = 'Products'
 
-    orders: list['Order'] = Relationship(back_populates="products", link_model=ProductOrderLink)
+    orders: list['Order'] = Relationship(back_populates="products",
+                                         link_model=ProductOrderLink)
+    images: list['Image'] = Relationship(back_populates="product")
 
 
 class CreatingImage(SQLModel):
@@ -47,14 +49,18 @@ class CreatingImage(SQLModel):
 
 
 class Image(CreatingImage, ID, table=True):
-    pass
+    __tablename__ = 'Images'
+    product_id: int = Field(foreign_key='Products.id')
+    product: Product = Relationship(back_populates='images')
 
 
 class CreatingOrder(SQLModel):
+
     user_id: int = Field(foreign_key='Users.id')
-    user: 'User' = Relationship(back_populates='orders')
 
 
 class Order(CreatingOrder, ID, table=True):
     __tablename__ = 'Orders'
+
+    user: 'User' = Relationship(back_populates='orders')
     products: list[Product] = Relationship(back_populates="orders", link_model=ProductOrderLink)

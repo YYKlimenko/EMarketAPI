@@ -5,12 +5,12 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from auth.models import User
+# from auth.models import User
 from core.repositories import SQLAsyncRepository
 
 
 SECRET_KEY = 'KYKOYAKO'
-USER_MODEL = User
+# USER_MODEL = User
 
 """Настройка подключения к SQL-БД"""
 # LOGIN_DB = getenv('LOGIN_DB')
