@@ -35,9 +35,16 @@ class SQLAsyncRepository:
         await session.commit()
 
     async def retrieve(
-            self, model: type, response_model: type | None, field: str, value: str | int, session: AsyncSession
+            self,
+            model: type,
+            response_model: type | None,
+            field: str,
+            value: str | int,
+            session: AsyncSession
     ) -> SQLModel | None:
-        query = select(*await self.__class__._get_fields(model, response_model)) if response_model else select(model)
+        query = select(
+            *await self.__class__._get_fields(model, response_model)
+        ) if response_model else select(model)
         query = query.where(getattr(model, field) == value)
         instances = await session.execute(query)
         instances = instances.all() if response_model else instances.scalars().all()
@@ -47,8 +54,15 @@ class SQLAsyncRepository:
             return response_model(**instances[0]) if response_model else instances[0]
 
     async def retrieve_list(
-            self, model: type, session: AsyncSession, response_model: type | None = None, **kwargs) -> list[SQLModel]:
-        query = select(*await self.__class__._get_fields(model, response_model)) if response_model else select(model)
+            self,
+            model: type,
+            session: AsyncSession,
+            response_model: type | None = None,
+            **kwargs
+    ) -> list[SQLModel]:
+        query = select(
+            *await self.__class__._get_fields(model, response_model)
+        ) if response_model else select(model)
         if not kwargs:
             instances = await session.execute(query)
             return instances.all() if response_model else instances.scalars().all()

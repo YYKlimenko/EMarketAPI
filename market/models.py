@@ -54,12 +54,15 @@ class Image(CreatingImage, ID, table=True):
     product: Product = Relationship(back_populates='images')
 
 
-class CreatingOrder(SQLModel):
-
+class BaseOrder(SQLModel):
     user_id: int = Field(foreign_key='Users.id')
 
 
-class Order(CreatingOrder, ID, table=True):
+class CreatingOrder(BaseOrder, SQLModel):
+    products_id: list[int]
+
+
+class Order(BaseOrder, ID, table=True):
     __tablename__ = 'Orders'
 
     user: 'User' = Relationship(back_populates='orders')

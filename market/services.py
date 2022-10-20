@@ -4,8 +4,9 @@ from typing import AsyncGenerator
 from bcrypt import gensalt, hashpw
 from fastapi import UploadFile, Form, Depends, HTTPException, Path
 from sqlalchemy import update
+from sqlalchemy.engine import ChunkedIteratorResult
 from sqlalchemy.exc import IntegrityError
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, SQLModel, select
 
 from auth.models import CreatingUser, User, RetrievingUser
 from core.services.dataclasses import SignFloat
@@ -14,7 +15,7 @@ from core.services.services import Service, RelativeService
 from market.utils.image_edit import ImageFileUploader, ImageFileDeleter
 from market.models import (
     CreatingProductCategory, ProductCategory, Product, CreatingProduct, Image, CreatingImage,
-    # CreatingOrder, Order, NewOrder
+    CreatingOrder, Order, ProductOrderLink
 )
 
 
@@ -98,22 +99,58 @@ class UserService(Service):
         await session.commit()
 
 
-# class OrderService(RelativeService):
-#     _model: type = Order
-#     _creating_model: type = CreatingOrder
-#     _filter_kwargs: dict[str, type] = {'user_id': int}
-#     _back_relative_fields: dict[str, type] = {'user_id': User}
-#
-#     async def create(
-#             self,
-#             order: NewOrder,
-#             session: AsyncGenerator = Depends(ASYNC_SESSION)
-#     ) -> SQLModel:
-#         print('Hello')
-#         # products = []
-#         # for i in order.products_id:
-#         #     product =
-#         # # order = await self.repository.retrieve(
-#         # #     self._model, self._response_model, 'id', instance_id, session
-#         # # )
-#         # # products = await order.products
+class OrderService(RelativeService):
+    _model: type = Order
+    _creating_model: type = CreatingOrder
+    _filter_kwargs: dict[str, type] = {'user_id': int}
+    _back_relative_fields: dict[str, type] = {'user_id': User}
+
+    async def create(
+            self,
+            order: CreatingOrder,
+            session: AsyncGenerator = Depends(ASYNC_SESSION)
+    ) -> None:
+        products = (
+            await session.execute(select(Product).where(Product.id.in_(order.products_id)))
+        ).scalars().all()
+        order = self._model(**order.dict(), products=products)
+        session.add(order)
+        await session.commit()
+
+    async def retrieve_by_id(
+            self,
+            order_id: int = Path(..., alias='id'),
+            session: AsyncGenerator = Depends(ASYNC_SESSION)
+    ) -> SQLModel:
+        order = (
+            await session.execute(select(self._model).where(self._model.id == order_id))
+        ).scalar()
+        products = (
+            await session.execute(
+                select(ProductOrderLink.product_id).where(ProductOrderLink.order_id == order_id)
+            )
+        ).scalars().all()
+        return self._creating_model(**order.dict(), products_id=products)
+
+    async def retrieve_list(
+            self,
+            session: AsyncGenerator = Depends(ASYNC_SESSION)
+    ) -> list:
+        orders = (
+            await session.execute(
+                select(Order, Product.id).outerjoin(Order.products).order_by(Order.id))
+        )
+        dict_orders = {}
+        while True:
+            try:
+                product_order = next(orders)
+                order = product_order[0].dict()
+                if dict_orders.get(order['id']):
+                    dict_orders[order['id']]['products'].add(product_order[1])
+                else:
+                    order['products'] = set()
+                    order['products'].add(product_order[1])
+                    dict_orders[order['id']] = order
+            except StopIteration:
+                break
+        return list(dict_orders.values())
