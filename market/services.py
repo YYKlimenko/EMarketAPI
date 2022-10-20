@@ -4,7 +4,6 @@ from typing import AsyncGenerator
 from bcrypt import gensalt, hashpw
 from fastapi import UploadFile, Form, Depends, HTTPException, Path
 from sqlalchemy import update
-from sqlalchemy.engine import ChunkedIteratorResult
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Field, SQLModel, select
 
