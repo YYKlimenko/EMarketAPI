@@ -136,21 +136,19 @@ class OrderService(RelativeService):
             self,
             session: AsyncGenerator = Depends(ASYNC_SESSION)
     ) -> list:
-        orders = (
-            await session.execute(
-                select(Order, Product.id).outerjoin(Order.products).order_by(Order.id))
-        )
-        dict_orders = {}
+        select_statement = select(self._model, Product.id).outerjoin(self._model.products)
+        orders_products = await session.execute(select_statement.order_by(self._model.id))
+        orders = {}
         while True:
             try:
-                product_order = next(orders)
-                order = product_order[0].dict()
-                if dict_orders.get(order['id']):
-                    dict_orders[order['id']]['products'].add(product_order[1])
+                order_product = next(orders_products)
+                order = order_product[0].dict()
+                if orders.get(order['id']):
+                    orders[order['id']]['products'].add(order_product[1])
                 else:
-                    order['products'] = set()
-                    order['products'].add(product_order[1])
-                    dict_orders[order['id']] = order
+                    order['products'] = {order_product[1]}
+                    orders[order['id']] = order
             except StopIteration:
                 break
-        return list(dict_orders.values())
+        return list(orders.values())
+
