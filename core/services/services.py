@@ -37,7 +37,9 @@ class ServiceMeta(type):
         def __init__(self, repository: RepositoryInterface) -> None:
             self.repository: RepositoryInterface = repository
 
-        async def create(self, instance: _creating_model, session: AsyncGenerator = Depends(ASYNC_SESSION)) -> None:
+        async def create(
+                self, instance: _creating_model, session: AsyncGenerator = Depends(ASYNC_SESSION)
+        ) -> None:
             return await self.repository.create(self._model, instance, session)
 
         async def retrieve_by_id(
@@ -45,7 +47,9 @@ class ServiceMeta(type):
                 instance_id: int = Path(..., alias='id'),
                 session: AsyncGenerator = Depends(ASYNC_SESSION)
         ) -> SQLModel:
-            return await self.repository.retrieve(self._model, self._response_model, 'id', instance_id, session)
+            return await self.repository.retrieve(
+                self._model, self._response_model, 'id', instance_id, session
+            )
 
         async def update(
                 self,
@@ -103,7 +107,9 @@ class FilterServiceMeta(ServiceMeta):
                 else:
                     kwargs[kwarg] = (kwargs[kwarg], 'eq')
             kwargs = {key: kwargs[key] for key in kwargs if kwargs[key][0]}
-            return await self.repository.retrieve_list(self._model, session, self._response_model, **kwargs)
+            return await self.repository.retrieve_list(
+                self._model, session, self._response_model, **kwargs
+            )
 
         mcs.add_attributes(class_instance, (retrieve_list, filter_kwargs), dct)
         return class_instance

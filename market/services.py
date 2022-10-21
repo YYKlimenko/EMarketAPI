@@ -73,8 +73,7 @@ class UserService(Service):
                            is_admin=False,
                            date_registration=datetime.utcnow())
         try:
-            session.add(user)
-            await session.commit()
+            await self.create(instance=user, session=session)
         except IntegrityError:
             raise HTTPException(
                 422,
@@ -143,9 +142,9 @@ class OrderService(RelativeService):
                 order_product = next(orders_products)
                 order = order_product[0].dict()
                 if orders.get(order['id']):
-                    orders[order['id']]['products'].add(order_product[1])
+                    orders[order['id']]['products_id'].add(order_product[1])
                 else:
-                    order['products'] = {order_product[1]}
+                    order['products_id'] = {order_product[1]}
                     orders[order['id']] = order
             except StopIteration:
                 break

@@ -30,8 +30,14 @@ class SQLAsyncRepository:
     async def _get_fields(model: type, response_model: type) -> list[Row]:
         return [getattr(model, field) for field in response_model.__fields__.keys()]
 
-    async def create(self, model: type, instance: SQLModel, session: AsyncSession) -> None:
-        session.add(model(**instance.dict()))
+    async def create(
+            self,
+            model: type,
+            instance: SQLModel,
+            session: AsyncSession,
+    ) -> None:
+        instance = instance if type(instance) == model else model(**instance.dict())
+        session.add(instance)
         await session.commit()
 
     async def retrieve(
@@ -73,7 +79,9 @@ class SQLAsyncRepository:
             instances = await session.execute(query)
         return instances.all() if response_model else instances.scalars().all()
 
-    async def edit(self, model: type, instance_id: int, session: AsyncSession, data: SQLModel | None) -> None:
+    async def edit(
+            self, model: type, instance_id: int, session: AsyncSession, data: SQLModel | None
+    ) -> None:
         if data:
             instance = update(model).where(model.id == instance_id)
             instance = instance.values(**data.dict())

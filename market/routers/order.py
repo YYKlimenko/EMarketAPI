@@ -10,7 +10,7 @@ service = OrderService(repository)
 
 
 @router.get('/orders/')
-async def get_orders(response: list[Order] = Depends(service.retrieve_list)) -> list[Order]:
+async def get_orders(response: list[Order] = Depends(service.retrieve_list)) -> list:
     return response
 
 
