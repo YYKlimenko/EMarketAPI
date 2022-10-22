@@ -10,9 +10,7 @@ class IDUser(SQLModel):
 
 
 class BaseUser(SQLModel):
-    username: str = Field(
-        max_length=30, index=True, sa_column_kwargs={'unique': True}
-    )
+    username: str = Field(max_length=30, index=True, sa_column_kwargs={'unique': True})
     number: str = Field(max_length=12)
 
     @validator('number')
@@ -51,5 +49,4 @@ class User(RetrievingUser, table=True):
     __tablename__ = 'Users'
 
     hashed_password: str = Field(max_length=256)
-
     orders: list['Order'] = Relationship(back_populates="user")

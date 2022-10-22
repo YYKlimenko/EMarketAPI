@@ -11,7 +11,9 @@ service = UserService(repository)
 
 
 @router.get('/users/')
-async def get_users(response: list[RetrievingUser] = Depends(service.retrieve_list)) -> list[RetrievingUser]:
+async def get_users(
+        response: list[RetrievingUser] = Depends(service.retrieve_list)
+) -> list[RetrievingUser]:
     return response
 
 
@@ -30,6 +32,6 @@ def registrate_user(response: None = Depends(service.registrate)) -> None:
     return response
 
 
-@router.patch('/users/{user_id}/', status_code=202, description='Change user\'s data')
-def change_user_data(response: dict[str, str] = Depends(service.change_data)) -> dict[str, str]:
+@router.put('/users/{id}', status_code=202, description='Change user\'s data')
+def change_user_data(response: None = Depends(service.update)) -> None:
     return response

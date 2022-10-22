@@ -1,3 +1,5 @@
+from typing import Any
+
 from fastapi import HTTPException
 from sqlalchemy import delete, select, update
 from sqlalchemy.engine import Row
@@ -79,13 +81,18 @@ class SQLAsyncRepository:
             instances = await session.execute(query)
         return instances.all() if response_model else instances.scalars().all()
 
+    async def _update(self, model, instance_id, data: dict[str, Any]) -> None:
+        return update(model).where(model.id == instance_id).values(**data)
+
+    async def _delete(self, model, instance_id):
+        return delete(model).where(model.id == instance_id)
+
     async def edit(
-            self, model: type, instance_id: int, session: AsyncSession, data: SQLModel | None
+            self, model: type, instance_id: int, session: AsyncSession, data: dict[str, Any] | None
     ) -> None:
         if data:
-            instance = update(model).where(model.id == instance_id)
-            instance = instance.values(**data.dict())
+            instance = await self._update(model, instance_id, data)
         else:
-            instance = delete(model).where(model.id == instance_id)
+            instance = await self._delete(model, instance_id)
         await session.execute(instance)
-        await session.commit()
+        return await session.commit()

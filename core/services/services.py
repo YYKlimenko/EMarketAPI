@@ -33,6 +33,7 @@ class ServiceMeta(type):
         _creating_model = dct.get('_creating_model', BaseModel)
         _model = dct.get('_model', BaseModel)
         class_instance._response_model = dct.get('_response_model', None)
+        class_instance._final_fields = dct.get('_final_fields', [])
 
         def __init__(self, repository: RepositoryInterface) -> None:
             self.repository: RepositoryInterface = repository
@@ -53,14 +54,15 @@ class ServiceMeta(type):
 
         async def update(
                 self,
-                instance: _creating_model,
+                data: dict[str, Any],
                 instance_id: int = Path(..., alias='id'),
                 session: AsyncGenerator = Depends(ASYNC_SESSION)
         ) -> None:
-            try:
-                return await self.repository.edit(self._model, instance_id, session, data=instance)
-            except IntegrityError:
-                raise HTTPException(422, detail='Data is not correct')
+            for attr in data:
+                if attr in self._final_fields or attr not in self._model.__fields__:
+                    raise HTTPException(422, 'The attributes are not correct')
+            return await self.repository.edit(self._model, instance_id, session, data=data)
+
 
         async def delete(
                 self,

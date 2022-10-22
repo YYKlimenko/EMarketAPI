@@ -1,13 +1,12 @@
 from datetime import datetime
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Any
 
 from bcrypt import gensalt, hashpw
 from fastapi import UploadFile, Form, Depends, HTTPException, Path
-from sqlalchemy import update
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Field, SQLModel, select
 
-from auth.models import CreatingUser, User, RetrievingUser
+from auth.models import CreatingUser, RetrievingUser, User
 from core.services.dataclasses import SignFloat
 from core.settings import get_async_session as ASYNC_SESSION
 from core.services.services import Service, RelativeService
@@ -61,7 +60,8 @@ class ImageService(RelativeService):
 class UserService(Service):
     _model: type = User
     _creating_model: type = CreatingUser
-    _response_model: type | None = RetrievingUser
+    _response_model: type = RetrievingUser
+    _final_fields = ['hashed_password', 'date_registration', 'is_admin']
     _filter_kwargs: dict[str, type] = {'username': str}
 
     async def registrate(
@@ -79,22 +79,6 @@ class UserService(Service):
                 422,
                 detail='Username and number must be unique'
             )
-
-    async def change_data(
-            self,
-            user_id: int,
-            username: str | None = None,
-            number: str | None = None,
-            session: AsyncGenerator = Depends(ASYNC_SESSION)
-    ) -> None:
-        data = {}
-        for attribute in ('username', 'number'):
-            if locals().get(attribute):
-                data[attribute] = locals().get(attribute)
-        instance = update(self._model).where(self._model.id == user_id)
-        instance = instance.values(**data)
-        await session.execute(instance)
-        await session.commit()
 
 
 class OrderService(RelativeService):
