@@ -1,4 +1,3 @@
-from os import getenv
 from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -6,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 # from auth.models import User
-from core.repositories import SQLAsyncRepository
+from repositories import SQLAsyncRepository
 
 
 SECRET_KEY = 'KYKOYAKO'
@@ -25,7 +24,7 @@ engine = create_async_engine(
     f'{DIALECT_DB}+{DRIVER_DB}://{URL_DB}', future=True, echo=True
 )
 session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
-repository = SQLAsyncRepository()
+repository_class = SQLAsyncRepository
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:

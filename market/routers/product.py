@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends
 
 from auth.objects import authenticator
-from core.settings import repository
+from core.settings import repository_class
 from market.models import Product
 from market.services import ProductService
 
 router = APIRouter(tags=['Products'])
-service = ProductService(repository)
+service = ProductService(repository_class)
 
 
 @router.get('/products/')

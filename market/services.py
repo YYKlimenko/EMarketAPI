@@ -1,9 +1,8 @@
 from datetime import datetime
-from typing import AsyncGenerator, Any
+from typing import AsyncGenerator
 
 from bcrypt import gensalt, hashpw
-from fastapi import UploadFile, Form, Depends, HTTPException, Path
-from sqlalchemy.exc import IntegrityError
+from fastapi import UploadFile, Form, Depends, Path
 from sqlmodel import Field, SQLModel, select
 
 from auth.models import CreatingUser, RetrievingUser, User
@@ -67,18 +66,12 @@ class UserService(Service):
     async def registrate(
             self, user: _creating_model, session: AsyncGenerator = Depends(ASYNC_SESSION)
     ) -> None:
-        user = self._model(username=user.username,
-                           number=user.number,
-                           hashed_password=hashpw(user.password.encode(), gensalt()),
-                           is_admin=False,
-                           date_registration=datetime.utcnow())
-        try:
-            await self.create(instance=user, session=session)
-        except IntegrityError:
-            raise HTTPException(
-                422,
-                detail='Username and number must be unique'
-            )
+        user = {'username': user.username,
+                'number': user.number,
+                'hashed_password': hashpw(user.password.encode(), gensalt()),
+                'is_admin': False,
+                'date_registration': datetime.utcnow()}
+        return await self._repository.create_from_dict(user, session)
 
 
 class OrderService(RelativeService):
@@ -88,9 +81,7 @@ class OrderService(RelativeService):
     _back_relative_fields: dict[str, type] = {'user_id': User}
 
     async def create(
-            self,
-            order: CreatingOrder,
-            session: AsyncGenerator = Depends(ASYNC_SESSION)
+            self, order: CreatingOrder, session: AsyncGenerator = Depends(ASYNC_SESSION)
     ) -> None:
         products = (
             await session.execute(select(Product).where(Product.id.in_(order.products_id)))
@@ -114,23 +105,16 @@ class OrderService(RelativeService):
         ).scalars().all()
         return self._creating_model(**order.dict(), products_id=products)
 
-    async def retrieve_list(
-            self,
-            session: AsyncGenerator = Depends(ASYNC_SESSION)
-    ) -> list:
+    async def retrieve_list(self, session: AsyncGenerator = Depends(ASYNC_SESSION)) -> list:
         select_statement = select(self._model, Product.id).outerjoin(self._model.products)
         orders_products = await session.execute(select_statement.order_by(self._model.id))
         orders = {}
-        while True:
-            try:
-                order_product = next(orders_products)
-                order = order_product[0].dict()
-                if orders.get(order['id']):
-                    orders[order['id']]['products_id'].add(order_product[1])
-                else:
-                    order['products_id'] = {order_product[1]}
-                    orders[order['id']] = order
-            except StopIteration:
-                break
+        for order_product in orders_products:
+            order = order_product[0].dict()
+            if orders.get(order['id']):
+                orders[order['id']]['products_id'].add(order_product[1])
+            else:
+                order['products_id'] = {order_product[1]}
+                orders[order['id']] = order
         return list(orders.values())
 

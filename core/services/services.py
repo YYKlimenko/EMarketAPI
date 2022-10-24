@@ -2,7 +2,6 @@ from typing import Any, AsyncGenerator
 
 from fastapi import HTTPException, Path, Depends
 from pydantic import BaseModel, create_model
-from sqlalchemy.exc import IntegrityError
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -35,22 +34,25 @@ class ServiceMeta(type):
         class_instance._response_model = dct.get('_response_model', None)
         class_instance._final_fields = dct.get('_final_fields', [])
 
-        def __init__(self, repository: RepositoryInterface) -> None:
-            self.repository: RepositoryInterface = repository
+        def __init__(
+                self,
+                repository_class: type,
+                model: type = _model,
+                response_model: type = class_instance._response_model
+        ) -> None:
+            self.repository: RepositoryInterface = repository_class(model, response_model)
 
         async def create(
                 self, instance: _creating_model, session: AsyncGenerator = Depends(ASYNC_SESSION)
         ) -> None:
-            return await self.repository.create(self._model, instance, session)
+            return await self.repository.create(instance, session)
 
         async def retrieve_by_id(
                 self,
                 instance_id: int = Path(..., alias='id'),
                 session: AsyncGenerator = Depends(ASYNC_SESSION)
         ) -> SQLModel:
-            return await self.repository.retrieve(
-                self._model, self._response_model, 'id', instance_id, session
-            )
+            return await self.repository.retrieve(session, id=(instance_id, 'eq'))
 
         async def update(
                 self,
@@ -61,18 +63,15 @@ class ServiceMeta(type):
             for attr in data:
                 if attr in self._final_fields or attr not in self._model.__fields__:
                     raise HTTPException(422, 'The attributes are not correct')
-            return await self.repository.edit(self._model, instance_id, session, data=data)
-
+            return await self.repository.edit(instance_id, session, data=data)
 
         async def delete(
                 self,
                 instance_id: int = Path(..., alias='id'),
                 session: AsyncGenerator = Depends(ASYNC_SESSION)
         ) -> None:
-            return await self.repository.edit(self._model, instance_id, session, data=None)
-        mcs.add_attributes(
-            class_instance, (__init__, create, retrieve_by_id, update, delete), dct
-        )
+            return await self.repository.edit(instance_id, session, data=None)
+        mcs.add_attributes(class_instance, (__init__, create, retrieve_by_id, update, delete), dct)
 
         return class_instance
 
@@ -83,18 +82,11 @@ class FilterServiceMeta(ServiceMeta):
         filter_kwargs = dct.get('_filter_kwargs', dict())
         for attribute in filter_kwargs:
             if issubclass(filter_kwargs[attribute], BaseModel):
-                filter_kwargs[attribute] = (
-                    Any, Depends(filter_kwargs[attribute])
-                )
+                filter_kwargs[attribute] = (Any, Depends(filter_kwargs[attribute]))
             else:
-                filter_kwargs[attribute] = (
-                    filter_kwargs[attribute] | None, None
-                )
+                filter_kwargs[attribute] = (filter_kwargs[attribute] | None, None)
 
-        filter_kwargs = create_model(
-            'FilterKwargs',
-            **filter_kwargs
-            )
+        filter_kwargs = create_model('FilterKwargs', **filter_kwargs)
 
         async def retrieve_list(
                 self,
@@ -109,9 +101,7 @@ class FilterServiceMeta(ServiceMeta):
                 else:
                     kwargs[kwarg] = (kwargs[kwarg], 'eq')
             kwargs = {key: kwargs[key] for key in kwargs if kwargs[key][0]}
-            return await self.repository.retrieve_list(
-                self._model, session, self._response_model, **kwargs
-            )
+            return await self.repository.retrieve(session, many=True, **kwargs)
 
         mcs.add_attributes(class_instance, (retrieve_list, filter_kwargs), dct)
         return class_instance
@@ -138,11 +128,7 @@ class RelativeFilterServiceMeta(FilterServiceMeta):
                         422,
                         detail=f'{self._back_relative_fields[field].__name__} is not exists'
                     )
-            return await self.repository.create(
-                self._model,
-                instance,
-                session
-            )
+            return await self.repository.create(instance, session)
 
         mcs.add_attributes(class_instance, (create, exist_checker), dct)
         return class_instance
