@@ -2,7 +2,7 @@
 
 Стек: <br>
 Python 3.10  <br>
-fastapi + SQLModel <br>
+fastapi + SQLModel (оболочка над SQLAlchemy и Pydantic от создателей FastAPI) <br>
 Прочие зависимости: см. requiremets.txt
 
 В проекте реализовано: <br>
