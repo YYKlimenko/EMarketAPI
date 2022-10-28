@@ -7,14 +7,15 @@ from pydantic import BaseModel, validator
 
 
 class SignEnum(str, Enum):
-    eq = 'eq'
-    lt = 'lt'
-    gt = 'gt'
-    le = 'le'
-    ge = 'ge'
+    eq = '=='
+    lt = '<'
+    gt = '>'
+    le = '<='
+    ge = '>='
 
 
 class SignValue(BaseModel):
+    _sign_dict = {'eq': '==', 'lt': '<', 'gt': '>', 'le': '<=', 'ge': '>='}
     sign_value: str | None
 
     @staticmethod
@@ -30,10 +31,10 @@ class SignValue(BaseModel):
             if len(sign_value) != 2:
                 raise HTTPException(422)
             try:
-                cls.sign = SignEnum(sign_value[0])
+                cls.sign = cls._sign_dict[sign_value[0]]
                 cls.value = cls._check_type(sign_value[1])
             except ValueError:
-                raise HTTPException(422)
+                raise HTTPException(422, 'Invalid types')
 
 
 class SignFloat(SignValue):

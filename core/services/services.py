@@ -7,8 +7,10 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from core.services.dataclasses import SignValue
 from core.services.interfaces import RepositoryInterface
-from core.settings import get_async_session as ASYNC_SESSION
+from core.settings import get_async_session
 
+
+db = Depends(get_async_session)
 
 class ExistChecker:
     def __init__(self, repository: RepositoryInterface) -> None:
@@ -29,48 +31,50 @@ class ServiceMeta(type):
 
     def __new__(mcs, name, bases, dct):
         class_instance = super().__new__(mcs, name, bases, dct)
-        _creating_model = dct.get('_creating_model', BaseModel)
-        _model = dct.get('_model', BaseModel)
-        class_instance._response_model = dct.get('_response_model', None)
-        class_instance._final_fields = dct.get('_final_fields', [])
+        _model = dct.get('model', BaseModel)
+        _creating_model = dct.get('creating_model', BaseModel)
+        _response_model = dct.get('response_model', _model)
+        class_instance._mutable_fields = dct.get('mutable_fields',
+                                                 [field for field in _model.__fields__ if not 'id'])
 
         def __init__(
                 self,
-                repository_class: type,
+                repository: RepositoryInterface,
                 model: type = _model,
-                response_model: type = class_instance._response_model
+                response_model: type = _response_model
         ) -> None:
-            self.repository: RepositoryInterface = repository_class(model, response_model)
+            self._model: dict = {
+                'table': model,
+                'fields': [getattr(_model, attr) for attr in response_model.__fields__]
+            }
+            self._repository: RepositoryInterface = repository
 
-        async def create(
-                self, instance: _creating_model, session: AsyncGenerator = Depends(ASYNC_SESSION)
-        ) -> None:
-            return await self.repository.create(instance, session)
+        async def create(self, instance: _creating_model, session: AsyncGenerator = db) -> None:
+            return await self._repository.create(self._model['table'], instance.dict(), session)
 
         async def retrieve_by_id(
                 self,
                 instance_id: int = Path(..., alias='id'),
-                session: AsyncGenerator = Depends(ASYNC_SESSION)
+                session: AsyncSession = db
         ) -> SQLModel:
-            return await self.repository.retrieve(session, id=(instance_id, 'eq'))
+            return await self._repository.retrieve(self._model, session, id=(instance_id, '=='))
 
         async def update(
                 self,
                 data: dict[str, Any],
                 instance_id: int = Path(..., alias='id'),
-                session: AsyncGenerator = Depends(ASYNC_SESSION)
+                session: AsyncGenerator = db
         ) -> None:
             for attr in data:
-                if attr in self._final_fields or attr not in self._model.__fields__:
+                if attr not in self._mutable_fields:
                     raise HTTPException(422, 'The attributes are not correct')
-            return await self.repository.edit(instance_id, session, data=data)
+            return await self._repository.update(self._model['table'], instance_id, data, session)
 
         async def delete(
-                self,
-                instance_id: int = Path(..., alias='id'),
-                session: AsyncGenerator = Depends(ASYNC_SESSION)
+                self, instance_id: int = Path(..., alias='id'), session: AsyncGenerator = db
         ) -> None:
-            return await self.repository.edit(instance_id, session, data=None)
+            return await self._repository.delete(self._model['table'], instance_id, session)
+
         mcs.add_attributes(class_instance, (__init__, create, retrieve_by_id, update, delete), dct)
 
         return class_instance
@@ -79,7 +83,7 @@ class ServiceMeta(type):
 class FilterServiceMeta(ServiceMeta):
     def __new__(mcs, name, bases, dct):
         class_instance = super().__new__(mcs, name, bases, dct)
-        filter_kwargs = dct.get('_filter_kwargs', dict())
+        filter_kwargs = dct.get('filter_kwargs', dict())
         for attribute in filter_kwargs:
             if issubclass(filter_kwargs[attribute], BaseModel):
                 filter_kwargs[attribute] = (Any, Depends(filter_kwargs[attribute]))
@@ -90,7 +94,7 @@ class FilterServiceMeta(ServiceMeta):
 
         async def retrieve_list(
                 self,
-                session: AsyncGenerator = Depends(ASYNC_SESSION),
+                session: AsyncGenerator = db,
                 kwargs: dict[str, type] = Depends(filter_kwargs),
         ) -> list[SQLModel]:
             if issubclass(kwargs.__class__, BaseModel):
@@ -99,9 +103,9 @@ class FilterServiceMeta(ServiceMeta):
                 if isinstance(kwargs[kwarg], SignValue):
                     kwargs[kwarg] = (kwargs[kwarg].value, kwargs[kwarg].sign)
                 else:
-                    kwargs[kwarg] = (kwargs[kwarg], 'eq')
-            kwargs = {key: kwargs[key] for key in kwargs if kwargs[key][0]}
-            return await self.repository.retrieve(session, many=True, **kwargs)
+                    kwargs[kwarg] = (kwargs[kwarg], '==')
+            kwargs = {key: kwargs[key] for key in kwargs if kwargs[key][0] is not None}
+            return await self._repository.retrieve(self._model, session, many=True, **kwargs)
 
         mcs.add_attributes(class_instance, (retrieve_list, filter_kwargs), dct)
         return class_instance
@@ -113,9 +117,7 @@ class RelativeFilterServiceMeta(FilterServiceMeta):
         exist_checker = ExistChecker
 
         async def create(
-                self,
-                instance: dct.get('_creating_model', BaseModel),
-                session: AsyncGenerator = Depends(ASYNC_SESSION)
+                self, instance: dct.get('_creating_model', BaseModel), session: AsyncGenerator = db
         ) -> None:
             for field in self._back_relative_fields:
                 _exist_checker = self.ExistChecker(self.repository)
@@ -128,7 +130,7 @@ class RelativeFilterServiceMeta(FilterServiceMeta):
                         422,
                         detail=f'{self._back_relative_fields[field].__name__} is not exists'
                     )
-            return await self.repository.create(instance, session)
+            return await self._repository.create(self.model, instance.dict(), session)
 
         mcs.add_attributes(class_instance, (create, exist_checker), dct)
         return class_instance

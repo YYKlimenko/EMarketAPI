@@ -1,4 +1,4 @@
-from pydantic import condecimal, BaseModel
+from pydantic import condecimal
 from sqlmodel import SQLModel, Field, Relationship
 
 

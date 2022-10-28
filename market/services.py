@@ -17,26 +17,28 @@ from market.models import (
 
 
 class CategoryService(Service):
-    _creating_model = CreatingProductCategory
-    _model = ProductCategory
-    _filter_kwargs = {'name': str}
+    creating_model = CreatingProductCategory
+    model = ProductCategory
+    filter_kwargs = {'name': str}
+    mutable_fields = ('name',)
 
 
 class ProductService(RelativeService):
     class SignPrice(SignFloat):
         sign_value: str | None = Field(default=None, alias='price')
 
-    _creating_model = CreatingProduct
-    _model = Product
-    _back_relative_fields = {'category_id': ProductCategory}
-    _filter_kwargs = {'name': str, 'price': SignPrice, 'category_id': int}
+    creating_model = CreatingProduct
+    model = Product
+    back_relative_fields = {'category_id': ProductCategory}
+    filter_kwargs = {'name': str, 'price': SignPrice, 'category_id': int}
+    mutable_fields = ('name', 'description', 'constitution', 'string', 'price', 'category_id')
 
 
 class ImageService(RelativeService):
-    _model: type = Image
-    _creating_model: type = CreatingImage
-    _filter_kwargs: dict[str, type] = {'product_id': int}
-    _back_relative_fields: dict[str, type] = {'product_id': Product}
+    model: type = Image
+    creating_model: type = CreatingImage
+    filter_kwargs: dict[str, type] = {'product_id': int}
+    back_relative_fields: dict[str, type] = {'product_id': Product}
 
     async def create_image(
             self,
@@ -57,14 +59,14 @@ class ImageService(RelativeService):
 
 
 class UserService(Service):
-    _model: type = User
-    _creating_model: type = CreatingUser
-    _response_model: type = RetrievingUser
-    _final_fields = ['hashed_password', 'date_registration', 'is_admin']
-    _filter_kwargs: dict[str, type] = {'username': str}
+    model: type = User
+    creating_model: type = CreatingUser
+    response_model: type = RetrievingUser
+    final_fields = ['hashed_password', 'date_registration', 'is_admin']
+    filter_kwargs: dict[str, type] = {'username': str}
 
     async def registrate(
-            self, user: _creating_model, session: AsyncGenerator = Depends(ASYNC_SESSION)
+            self, user: creating_model, session: AsyncGenerator = Depends(ASYNC_SESSION)
     ) -> None:
         user = {'username': user.username,
                 'number': user.number,
@@ -75,10 +77,10 @@ class UserService(Service):
 
 
 class OrderService(RelativeService):
-    _model: type = Order
-    _creating_model: type = CreatingOrder
-    _filter_kwargs: dict[str, type] = {'user_id': int}
-    _back_relative_fields: dict[str, type] = {'user_id': User}
+    model: type = Order
+    creating_model: type = CreatingOrder
+    filter_kwargs: dict[str, type] = {'user_id': int}
+    back_relative_fields: dict[str, type] = {'user_id': User}
 
     async def create(
             self, order: CreatingOrder, session: AsyncGenerator = Depends(ASYNC_SESSION)
@@ -117,4 +119,3 @@ class OrderService(RelativeService):
                 order['products_id'] = {order_product[1]}
                 orders[order['id']] = order
         return list(orders.values())
-

@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends
 
 from auth.objects import authenticator
 from auth.models import RetrievingUser
-from core.settings import repository_class
+from core.settings import repository
 from market.services import UserService
 
 
 router = APIRouter(tags=['Users'])
-service = UserService(repository_class)
+service = UserService(repository)
 
 
 @router.get('/users/', status_code=200, description='Get a list of users')

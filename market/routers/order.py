@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends
 
 from auth.objects import authenticator
-from core.settings import repository_class
+from core.settings import repository
 from market.models import Order
 from market.services import OrderService
 
 router = APIRouter(tags=['Orders'])
-service = OrderService(repository_class)
+service = OrderService(repository)
 
 
 @router.get('/orders/', status_code=200, description='Get a list of orders')
