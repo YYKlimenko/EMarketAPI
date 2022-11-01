@@ -1,5 +1,6 @@
 from typing import AsyncGenerator
 
+from fastapi import Depends
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -30,3 +31,5 @@ repository = SQLAsyncRepository()
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async with session() as db:
         yield db
+
+db = Depends(get_async_session)

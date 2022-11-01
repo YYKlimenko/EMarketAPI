@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends
 
 from auth.objects import authenticator
 from core.settings import repository
-from market.models import ProductCategory
+from market.models import ProductCategory, CreatingProductCategory
 from market.services import CategoryService
 
 router = APIRouter(tags=['Categories'])
-service = CategoryService(repository)
+service = CategoryService(repository, ProductCategory, CreatingProductCategory)
 
 
 @router.get('/categories/')

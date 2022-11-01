@@ -1,4 +1,4 @@
-from pydantic import condecimal
+from pydantic import condecimal, validator
 from sqlmodel import SQLModel, Field, Relationship
 
 
@@ -60,6 +60,13 @@ class BaseOrder(SQLModel):
 
 class CreatingOrder(BaseOrder, SQLModel):
     products_id: list[int]
+
+    @validator('products_id')
+    def check_list(cls, products_id: list[int], values: dict[str, str]) -> list[int]:
+        if len(products_id):
+            return products_id
+        else:
+            raise ValueError('The product list can\'t to be empty')
 
 
 class Order(BaseOrder, ID, table=True):

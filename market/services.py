@@ -2,13 +2,16 @@ from datetime import datetime
 from typing import AsyncGenerator
 
 from bcrypt import gensalt, hashpw
-from fastapi import UploadFile, Form, Depends, Path
+from fastapi import UploadFile, Form, Depends, Path, HTTPException
+from sqlalchemy.engine import Row
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import Field, SQLModel, select
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from auth.models import CreatingUser, RetrievingUser, User
 from core.services.dataclasses import SignFloat
-from core.settings import get_async_session as ASYNC_SESSION
-from core.services.services import Service, RelativeService
+from core.settings import db
+from core.services.services import Service
 from market.utils.image_edit import ImageFileUploader, ImageFileDeleter
 from market.models import (
     CreatingProductCategory, ProductCategory, Product, CreatingProduct, Image, CreatingImage,
@@ -17,97 +20,90 @@ from market.models import (
 
 
 class CategoryService(Service):
-    creating_model = CreatingProductCategory
-    model = ProductCategory
-    filter_kwargs = {'name': str}
-    mutable_fields = ('name',)
+    async def create(self, instance: CreatingProductCategory, session: AsyncSession = db) -> None:
+        return await super()._create(instance, session)
+
+    async def retrieve_list(self, session: AsyncSession = db, name: str | None = None):
+        return await super()._retrieve_list(session, name=name)
 
 
-class ProductService(RelativeService):
+class ProductService(Service):
     class SignPrice(SignFloat):
         sign_value: str | None = Field(default=None, alias='price')
 
-    creating_model = CreatingProduct
-    model = Product
-    back_relative_fields = {'category_id': ProductCategory}
-    filter_kwargs = {'name': str, 'price': SignPrice, 'category_id': int}
-    mutable_fields = ('name', 'description', 'constitution', 'string', 'price', 'category_id')
+    async def create(self, instance: CreatingProduct, session: AsyncSession = db) -> None:
+        return await super()._create(instance, session)
+
+    async def retrieve_list(
+            self,
+            session: AsyncSession = db,
+            name: str | None = None,
+            price: str | None = Depends(SignPrice),
+            category_id: int | None = None
+    ) -> list[Row]:
+        return await super()._retrieve_list(
+            session, name=name, price=price, category_id=category_id
+        )
 
 
-class ImageService(RelativeService):
-    model: type = Image
-    creating_model: type = CreatingImage
-    filter_kwargs: dict[str, type] = {'product_id': int}
-    back_relative_fields: dict[str, type] = {'product_id': Product}
+class ImageService(Service):
 
     async def create_image(
             self,
             file: UploadFile,
-            product_id: int = Form(..., alias='product_id'),
-            session: AsyncGenerator = Depends(ASYNC_SESSION)
+            product_id: int = Form(),
+            session: AsyncSession = db
     ) -> None:
         url = await ImageFileUploader(file, str(product_id)).upload()
-        creating_image = self._creating_model(url=url, product_id=product_id)
-        return await self.create(creating_image, session=session)
+        image = {'url': url, 'product_id': product_id}
+        try:
+            await self._repository.create(self._model, image, session)
+        except IntegrityError:
+            await ImageFileDeleter('media', url).delete()
 
-    async def delete_image(
-            self, image_id: int, session: AsyncGenerator = Depends(ASYNC_SESSION)
-    ) -> None:
+    async def delete_image(self, image_id: int, session: AsyncSession = db) -> None:
         if image := await self.retrieve_by_id(image_id, session=session):
             await ImageFileDeleter('media', image.url).delete()
             return await self.delete(image_id, session=session)
 
+    async def retrieve_list(
+            self, session: AsyncSession = db, product_id: int | None = None
+    ) -> list[Row]:
+        return await super()._retrieve_list(session, product_id=product_id)
+
 
 class UserService(Service):
-    model: type = User
-    creating_model: type = CreatingUser
-    response_model: type = RetrievingUser
-    final_fields = ['hashed_password', 'date_registration', 'is_admin']
-    filter_kwargs: dict[str, type] = {'username': str}
 
-    async def registrate(
-            self, user: creating_model, session: AsyncGenerator = Depends(ASYNC_SESSION)
-    ) -> None:
+    async def registrate(self, user: CreatingUser, session: AsyncSession = db) -> None:
         user = {'username': user.username,
                 'number': user.number,
                 'hashed_password': hashpw(user.password.encode(), gensalt()),
                 'is_admin': False,
                 'date_registration': datetime.utcnow()}
-        return await self._repository.create_from_dict(user, session)
+        return await self._repository.create(self._model, user, session)
+
+    async def retrieve_list(
+            self, session: AsyncSession = db, username: str | None = None, number: str | None = None
+    ) -> list[Row]:
+        return await super()._retrieve_list(session, username=username, number=number)
 
 
-class OrderService(RelativeService):
-    model: type = Order
-    creating_model: type = CreatingOrder
-    filter_kwargs: dict[str, type] = {'user_id': int}
-    back_relative_fields: dict[str, type] = {'user_id': User}
+class OrderService(Service):
 
-    async def create(
-            self, order: CreatingOrder, session: AsyncGenerator = Depends(ASYNC_SESSION)
-    ) -> None:
-        products = (
-            await session.execute(select(Product).where(Product.id.in_(order.products_id)))
-        ).scalars().all()
-        order = self._model(**order.dict(), products=products)
-        session.add(order)
-        await session.commit()
+    async def create(self, order: CreatingOrder, session: AsyncSession = db) -> None:
+        products = await self._repository.get_relations(Product, order.products_id, session)
+        if len(products) == 0:
+            raise HTTPException(422)
+        await self._repository.create(self._model, {**order.dict(), 'products': products}, session)
 
-    async def retrieve_by_id(
-            self,
-            order_id: int = Path(..., alias='id'),
-            session: AsyncGenerator = Depends(ASYNC_SESSION)
-    ) -> SQLModel:
-        order = (
-            await session.execute(select(self._model).where(self._model.id == order_id))
-        ).scalar()
-        products = (
-            await session.execute(
-                select(ProductOrderLink.product_id).where(ProductOrderLink.order_id == order_id)
-            )
-        ).scalars().all()
-        return self._creating_model(**order.dict(), products_id=products)
+    async def retrieve_by_id(self, _id: int = Path(alias='id'), session: AsyncSession = db) -> Row:
+        order = await self._repository.retrieve(self._model, self._fields, session, id=(_id, '=='))
+        products = await self._repository.retrieve(
+            ProductOrderLink, [ProductOrderLink.product_id], session, True, order_id=(_id, '==')
+        )
+        return self._creating_model(**order, products_id=[product[0] for product in products])
 
-    async def retrieve_list(self, session: AsyncGenerator = Depends(ASYNC_SESSION)) -> list:
+    async def retrieve_list(self, session: AsyncSession = db) -> list[Row]:
         select_statement = select(self._model, Product.id).outerjoin(self._model.products)
         orders_products = await session.execute(select_statement.order_by(self._model.id))
         orders = {}

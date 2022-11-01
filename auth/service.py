@@ -5,8 +5,11 @@ import jwt
 from bcrypt import checkpw
 from fastapi import Body, HTTPException, Security, Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlmodel.ext.asyncio.session import AsyncSession
 
-from .settings import get_async_session, UserService
+from core.settings import db
+from market.services import UserService
+from .settings import  get_async_session
 
 
 class Authorizator:
@@ -25,7 +28,7 @@ class Authorizator:
 
     async def authorize(self, login: str = Body(...),
                         password: str = Body(...),
-                        session: AsyncGenerator = Depends(get_async_session)):
+                        session: AsyncSession = db):
         user = (await self._service.retrieve_list(session=session, kwargs={'username': login}))[0]
         if user and checkpw(password.encode(), user.hashed_password.encode()):
             return {"access_token": self.encode_jwt(user.id),

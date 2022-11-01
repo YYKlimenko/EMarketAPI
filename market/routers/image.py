@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends
 
 from auth.objects import authenticator
 from core.settings import repository
-from market.models import Image
+from market.models import Image, CreatingImage
 from market.services import ImageService
 
 router = APIRouter(tags=['Images'])
-service = ImageService(repository)
+service = ImageService(repository, Image, CreatingImage)
 
 
 @router.get('/images/', status_code=200, description='Get a list of images')
