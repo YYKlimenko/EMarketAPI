@@ -1,21 +1,24 @@
 from fastapi import APIRouter, Depends
 
 from auth.objects import authenticator
-from core.settings import repository
-from market.models import ProductCategory, CreatingProductCategory
+from core.repositories import SQLAsyncRepository
+from market.schemas import Category, CreatingCategory
 from market.services import CategoryService
+from market.models import CategoryModel
+
 
 router = APIRouter(tags=['Categories'])
-service = CategoryService(repository, ProductCategory, CreatingProductCategory)
+repository = SQLAsyncRepository(CategoryModel)
+service = CategoryService(repository, Category, CreatingCategory)
 
 
 @router.get('/categories/')
-async def get_categories(response=Depends(service.retrieve_list)) -> list[ProductCategory]:
+async def get_categories(response=Depends(service.retrieve_list)) -> list[Category]:
     return response
 
 
 @router.get('/categories/{id}')
-async def get_category(response=Depends(service.retrieve_by_id)) -> ProductCategory:
+async def get_category(response=Depends(service.retrieve_by_id)) -> Category:
     return response
 
 

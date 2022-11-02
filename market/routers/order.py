@@ -1,17 +1,19 @@
 from fastapi import APIRouter, Depends
 
 from auth.objects import authenticator
-from core.settings import repository
-from market.models import Order, CreatingOrder
+from core.repositories import SQLAsyncRepository
+from market.models import OrderModel
+from market.schemas import Order, CreatingOrder
 from market.services import OrderService
 
 router = APIRouter(tags=['Orders'])
+repository = SQLAsyncRepository(OrderModel)
 service = OrderService(repository, Order, CreatingOrder)
 
 
-@router.get('/orders/', status_code=200, description='Get a list of orders')
-async def get_orders(response: list[Order] = Depends(service.retrieve_list)) -> list:
-    return response
+# @router.get('/orders/', status_code=200, description='Get a list of orders')
+# async def get_orders(response: list[Order] = Depends(service.retrieve_list)) -> list:
+#     return response
 
 
 @router.get('/order/{id}', status_code=200, description='Get the order')

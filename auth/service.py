@@ -5,7 +5,7 @@ import jwt
 from bcrypt import checkpw
 from fastapi import Body, HTTPException, Security, Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.settings import db
 from market.services import UserService

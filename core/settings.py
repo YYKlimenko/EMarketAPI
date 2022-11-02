@@ -1,9 +1,9 @@
 from typing import AsyncGenerator
 
 from fastapi import Depends
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from sqlmodel.ext.asyncio.session import AsyncSession
+
 
 # from auth.models import User
 from core.repositories import SQLAsyncRepository
@@ -25,7 +25,6 @@ engine = create_async_engine(
     f'{DIALECT_DB}+{DRIVER_DB}://{URL_DB}', future=True, echo=True
 )
 session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
-repository = SQLAsyncRepository()
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:

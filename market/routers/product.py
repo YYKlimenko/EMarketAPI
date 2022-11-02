@@ -1,12 +1,14 @@
 from fastapi import APIRouter, Depends
 
 from auth.objects import authenticator
+from core.repositories import SQLAsyncRepository
+from market.models import ProductModel
 from market.services import ProductService
-from core.settings import repository
-from market.models import Product, CreatingProduct
+from market.schemas import Product, CreatingProduct
 
 
 router = APIRouter(tags=['Products'])
+repository = SQLAsyncRepository(ProductModel)
 service = ProductService(repository, Product, CreatingProduct)
 
 

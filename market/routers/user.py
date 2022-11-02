@@ -1,23 +1,25 @@
 from fastapi import APIRouter, Depends
 
 from auth.objects import authenticator
-from auth.models import RetrievingUser, User, CreatingUser
-from core.settings import repository
+from core.repositories import SQLAsyncRepository
+from market.models import UserModel
+from market.schemas import User, CreatingUser
 from market.services import UserService
 
 router = APIRouter(tags=['Users'])
-service = UserService(repository, User, CreatingUser, RetrievingUser, ['number', 'username'])
+repository = SQLAsyncRepository(UserModel)
+service = UserService(repository, User, CreatingUser, ['number', 'username'])
 
 
 @router.get('/users/', status_code=200, description='Get a list of users')
 async def get_users(
-        response: list[RetrievingUser] = Depends(service.retrieve_list)
-) -> list[RetrievingUser]:
+        response: list[User] = Depends(service.retrieve_list)
+) -> list[User]:
     return response
 
 
 @router.get('/users/{id}', status_code=200, description='Get the user')
-async def get_user(response: RetrievingUser = Depends(service.retrieve_by_id)) -> RetrievingUser:
+async def get_user(response: User = Depends(service.retrieve_by_id)) -> User:
     return response
 
 

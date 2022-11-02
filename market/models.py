@@ -1,76 +1,70 @@
-from pydantic import condecimal, validator
-from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy import Boolean, Column, DateTime, DECIMAL, ForeignKey, Integer, String, Table, \
+    create_engine, MetaData
+from sqlalchemy.orm import relationship, declarative_base
 
 
-class ID(SQLModel):
-    id: int = Field(primary_key=True)
+TableModel = declarative_base()
+
+ProductOrderLink = Table(
+    'product_order_link',
+    TableModel.metadata,
+    Column('order_id', ForeignKey('orders.id'), primary_key=True),
+    Column('product_id', ForeignKey('products.id'), primary_key=True)
+)
 
 
-class CreatingProductCategory(SQLModel):
-    name: str = Field(max_length=60)
+class ProductModel(TableModel):
+    __tablename__ = 'products'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(60), nullable=False)
+    description = Column(String(1000), nullable=False)
+    constitution = Column(String(1000), nullable=False)
+    price = Column(DECIMAL(), nullable=False)
+    category_id = Column(Integer, ForeignKey('categories.id'))
+
+    category = relationship('CategoryModel', back_populates='products')
+    orders = relationship('OrderModel', secondary=ProductOrderLink, back_populates='products')
+    images = relationship('ImageModel', back_populates='product', cascade='all, delete-orphan')
 
 
-class ProductCategory(CreatingProductCategory, ID, table=True):
-    __tablename__ = 'Categories'
+class CategoryModel(TableModel):
+    __tablename__ = 'categories'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(60), nullable=False)
+
+    products = relationship('ProductModel', back_populates='category', cascade='all, delete-orphan')
 
 
-class ProductOrderLink(SQLModel, table=True):
-    product_id: int | None = Field(
-        default=None, foreign_key="Products.id", primary_key=True
-    )
-    order_id: int | None = Field(
-        default=None, foreign_key="Orders.id", primary_key=True
-    )
+class ImageModel(TableModel):
+    __tablename__ = 'images'
+
+    id = Column(Integer, primary_key=True)
+    url = Column(String(60), nullable=False)
+    product_id = Column(Integer, ForeignKey('products.id'))
+
+    product = relationship('ProductModel', back_populates='images')
 
 
-class CreatingProduct(SQLModel):
-    name: str = Field(max_length=60)
-    description: str = Field(max_length=1000)
-    constitution: str = Field(max_length=1000)
-    price: condecimal(max_digits=10, decimal_places=3)
+class UserModel(TableModel):
+    __tablename__ = 'users'
 
-    category_id: int = Field(foreign_key='Categories.id')
-    category: ProductCategory = Relationship(back_populates='products')
+    id = Column(Integer, primary_key=True)
+    username = Column(String(40), unique=True, nullable=False, index=True)
+    number = Column(String(12), unique=True, nullable=False)
+    password = Column(String(256))
+    date_registration = Column(DateTime)
+    is_admin = Column(Boolean)
 
-
-class Product(CreatingProduct, ID, table=True):
-    __tablename__ = 'Products'
-
-    orders: list['Order'] = Relationship(back_populates="products",
-                                         link_model=ProductOrderLink)
-    images: list['Image'] = Relationship(back_populates="product")
+    orders = relationship('OrderModel', back_populates='user', cascade='all, delete-orphan')
 
 
-class CreatingImage(SQLModel):
-    url: str
+class OrderModel(TableModel):
+    __tablename__ = 'orders'
 
-    product_id: int = Field(foreign_key='Products.id')
-    product: Product = Relationship(back_populates='images')
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
 
-
-class Image(CreatingImage, ID, table=True):
-    __tablename__ = 'Images'
-    product_id: int = Field(foreign_key='Products.id')
-    product: Product = Relationship(back_populates='images')
-
-
-class BaseOrder(SQLModel):
-    user_id: int = Field(foreign_key='Users.id')
-
-
-class CreatingOrder(BaseOrder, SQLModel):
-    products_id: list[int]
-
-    @validator('products_id')
-    def check_list(cls, products_id: list[int], values: dict[str, str]) -> list[int]:
-        if len(products_id):
-            return products_id
-        else:
-            raise ValueError('The product list can\'t to be empty')
-
-
-class Order(BaseOrder, ID, table=True):
-    __tablename__ = 'Orders'
-
-    user: 'User' = Relationship(back_populates='orders')
-    products: list[Product] = Relationship(back_populates="orders", link_model=ProductOrderLink)
+    user = relationship('UserModel', back_populates='orders')
+    products = relationship('ProductModel', secondary=ProductOrderLink, back_populates='orders')

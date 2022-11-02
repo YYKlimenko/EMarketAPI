@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends
 
 from auth.objects import authenticator
-from core.settings import repository
-from market.models import Image, CreatingImage
+from core.repositories import SQLAsyncRepository, SQLAsyncRepository
+from market.schemas import Image, CreatingImage
 from market.services import ImageService
+from market.models import ImageModel
 
 router = APIRouter(tags=['Images'])
+repository = SQLAsyncRepository(ImageModel)
 service = ImageService(repository, Image, CreatingImage)
 
 
