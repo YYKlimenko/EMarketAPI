@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
 
-from auth.objects import authenticator
 from core.repositories import SQLAsyncRepository
 from market.models import OrderModel
 from market.schemas import Order, CreatingOrder

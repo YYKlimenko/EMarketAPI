@@ -55,7 +55,7 @@ class ImageService(Service):
         url = await ImageFileUploader(file, str(product_id)).upload()
         image = {'url': url, 'product_id': product_id}
         try:
-            await self._repository.create(self._model, image, session)
+            await self._repository.create(image, session)
         except IntegrityError:
             await ImageFileDeleter('media', url).delete()
 
@@ -75,10 +75,10 @@ class UserService(Service):
     async def registrate(self, user: CreatingUser, session: AsyncSession = db) -> None:
         user = {'username': user.username,
                 'number': user.number,
-                'hashed_password': hashpw(user.password.encode(), gensalt()),
+                'password': hashpw(user.password.encode(), gensalt()).decode(),
                 'is_admin': False,
                 'date_registration': datetime.utcnow()}
-        return await self._repository.create(self._model, user, session)
+        return await self._repository.create(user, session)
 
     async def retrieve_list(
             self, session: AsyncSession = db, username: str | None = None, number: str | None = None

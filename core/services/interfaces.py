@@ -1,5 +1,6 @@
 from typing import Protocol, Any
 
+from pydantic import BaseModel
 from sqlalchemy.engine import Row
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,14 +13,13 @@ class RepositoryInterface(Protocol):
         raise NotImplementedError
 
     async def retrieve(
-            self, fields: list[Any], session: AsyncSession, many: bool = False, **kwargs
+            self, data: BaseModel, session: AsyncSession, many: bool = False, **kwargs
     ) -> Row | list[Row]:
         raise NotImplementedError
 
     async def update(self, _id: int, data: dict[str, Any], session: AsyncSession) -> None:
         raise NotImplementedError
 
-    @staticmethod
     async def delete(self, _id, session: AsyncSession):
         raise NotImplementedError
 
@@ -33,3 +33,5 @@ class RepositoryInterface(Protocol):
     @staticmethod
     async def commit(session: AsyncSession, query=None) -> None:
         raise NotImplementedError
+
+

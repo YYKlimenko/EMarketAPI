@@ -27,10 +27,10 @@ class Service:
             filters: dict[str, Any] | None = None
     ) -> None:
         self._repository = repository
-        self._creating_model = creating_model
-        self._response_model = response_model
+        self._creating_schema = creating_model
+        self._response_schema = response_model
         self._updatable_fields = updatable_fields or [
-            attr for attr in self._response_model.__fields__ if attr != 'id'
+            attr for attr in self._response_schema.__fields__ if attr != 'id'
         ]
 
         self.filters = filters or dict()
@@ -47,7 +47,7 @@ class Service:
             return None
 
     async def retrieve_by_id(self, _id: int = Path(alias='id'), session: AsyncSession = db) -> Row:
-        return await self._repository.retrieve(self._response_model, session, id=(_id, '=='))
+        return await self._repository.retrieve(self._response_schema, session, id=(_id, '=='))
 
     async def _retrieve_list(self, session: AsyncSession, **kwargs) -> list[Row]:
         for kwarg in kwargs:
@@ -56,7 +56,7 @@ class Service:
             else:
                 kwargs[kwarg] = (kwargs[kwarg], '==')
         kwargs = {key: kwargs[key] for key in kwargs if kwargs[key][0] is not None}
-        return await self._repository.retrieve(self._response_model, session, True, **kwargs)
+        return await self._repository.retrieve(self._response_schema, session, True, **kwargs)
 
     async def update(
             self, data: dict[str, Any], _id: int = Path(alias='id'), session: AsyncSession = db

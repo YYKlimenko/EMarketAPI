@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
 
-from auth.objects import authenticator
 from core.repositories import SQLAsyncRepository
 from market.schemas import Category, CreatingCategory
 from market.services import CategoryService
@@ -9,7 +8,7 @@ from market.models import CategoryModel
 
 router = APIRouter(tags=['Categories'])
 repository = SQLAsyncRepository(CategoryModel)
-service = CategoryService(repository, Category, CreatingCategory)
+service = CategoryService(repository, CreatingCategory, Category)
 
 
 @router.get('/categories/')

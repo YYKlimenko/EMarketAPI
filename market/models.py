@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, DateTime, DECIMAL, ForeignKey, Integer, String, Table, \
+from sqlalchemy import BINARY, Boolean, Column, DateTime, DECIMAL, ForeignKey, Integer, String, Table, \
     create_engine, MetaData
 from sqlalchemy.orm import relationship, declarative_base
 

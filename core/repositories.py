@@ -3,12 +3,14 @@ from typing import Any
 from pydantic import BaseModel
 from sqlalchemy import delete, select, update
 from sqlalchemy.engine import Row
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from core.services.interfaces import RepositoryInterface
 from market.models import TableModel
 
 
-class SQLAsyncRepository:
+class SQLAsyncRepository(RepositoryInterface):
 
     def __init__(self, model: TableModel):
         self.model: TableModel = model
@@ -18,17 +20,20 @@ class SQLAsyncRepository:
         return await self.commit(session)
 
     async def retrieve(
-            self, response_model: list[Any], session: AsyncSession, many: bool = False, **kwargs
+            self, data: BaseModel, session: AsyncSession, many: bool = False, **kwargs
     ) -> Row | list[Row]:
-        query = select(*[getattr(self.model, attr) for attr in response_model.__fields__])
+        query = select(*[getattr(self.model, attr) for attr in data.__fields__])
         if kwargs:
             query = query.where(*await self.get_filters(kwargs))
         instances = await session.execute(query)
         return instances.all() if many else instances.first()
 
     async def update(self, _id: int, data: dict[str, Any], session: AsyncSession) -> None:
-        query = update(self.model).where(self.model.id == _id).values(**data)
-        return await self.commit(session, query)
+        try:
+            query = update(self.model).where(self.model.id == _id).values(**data)
+            return await self.commit(session, query)
+        except IntegrityError:
+            return None
 
     async def delete(self, _id, session: AsyncSession):
         query = delete(self.model).where(self.model.id == _id)

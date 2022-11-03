@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
 
-from auth.objects import authenticator
 from core.repositories import SQLAsyncRepository
 from market.models import ProductModel
 from market.services import ProductService

@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
 
-from auth.objects import authenticator
 from core.repositories import SQLAsyncRepository
 from market.models import UserModel
 from market.schemas import User, CreatingUser
@@ -8,7 +7,7 @@ from market.services import UserService
 
 router = APIRouter(tags=['Users'])
 repository = SQLAsyncRepository(UserModel)
-service = UserService(repository, User, CreatingUser, ['number', 'username'])
+service = UserService(repository, CreatingUser, User, ['number', 'username'])
 
 
 @router.get('/users/', status_code=200, description='Get a list of users')

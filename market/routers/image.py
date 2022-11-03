@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from auth.objects import authenticator
-from core.repositories import SQLAsyncRepository, SQLAsyncRepository
+from core.repositories import SQLAsyncRepository
 from market.schemas import Image, CreatingImage
 from market.services import ImageService
 from market.models import ImageModel

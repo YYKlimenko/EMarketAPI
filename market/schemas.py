@@ -59,16 +59,16 @@ class Image(CreatingImage, ID):
 
 
 class BaseUser(BaseModel):
-    username: str = Field(max_length=30)
-    number: str = Field(max_length=12)
+    username: str = Field(max_length=30, default='username')
+    number: str = Field(max_length=12, default='89050965588')
 
 
 class CreatingUser(BaseUser):
     """
     Pydantic schema for create User instance from DB
     """
-    password: str = Field(max_length=256)
-    password2: str = Field(max_length=256)
+    password: str = Field(max_length=256, default='password')
+    password2: str = Field(max_length=256, default='password')
 
     @validator('password2')
     def match_passwords(cls, password2: str, values: dict[str, str]) -> str:
