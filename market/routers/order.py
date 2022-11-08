@@ -7,7 +7,7 @@ from market.services import OrderService
 
 router = APIRouter(tags=['Orders'])
 repository = OrderAsyncPostgresRepository(OrderModel)
-service = OrderService(repository)
+service = OrderService(repository, ['user_id'])
 
 
 @router.get('/orders/', status_code=200, description='Get a list of orders')

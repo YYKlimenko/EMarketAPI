@@ -87,8 +87,9 @@ class UserService(Service):
 
 class OrderService(DeleteUpdateMixin):
 
-    def __init__(self, repository: OrderAsyncPostgresRepository):
+    def __init__(self, repository: OrderAsyncPostgresRepository, updatable_fields: list[str]):
         self._repository = repository
+        self._updatable_fields = updatable_fields
 
     async def create(self, instance: CreatingOrder, session: AsyncSession = db) -> None:
         products = await self._repository.get_products('product', instance.products, session)
