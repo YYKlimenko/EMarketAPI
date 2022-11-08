@@ -1,14 +1,13 @@
-from typing import Any, AsyncGenerator
+from typing import Any
 
-from fastapi import HTTPException, Path, Depends, Body
-from pydantic import BaseModel, create_model
+from fastapi import HTTPException, Path, Depends
+from pydantic import BaseModel
 from sqlalchemy.engine import Row
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.services.dataclasses import SignValue
 from core.services.interfaces import RepositoryInterface
-from core.services.utils import func_copy
 from core.settings import get_async_session
 from market.models import TableModel as Model
 
@@ -16,7 +15,20 @@ from market.models import TableModel as Model
 db = Depends(get_async_session)
 
 
-class Service:
+class DeleteUpdateMixin:
+    async def update(
+            self, data: dict[str, Any], _id: int = Path(alias='id'), session: AsyncSession = db
+    ) -> None:
+        for key in data:
+            if key not in self._updatable_fields:
+                raise HTTPException(422)
+        return await self._repository.update(_id, data, session)
+
+    async def delete(self, _id: int = Path(alias='id'), session: AsyncSession = db) -> None:
+        return await self._repository.delete(_id, session)
+
+
+class Service(DeleteUpdateMixin):
 
     def __init__(
             self,
@@ -57,14 +69,3 @@ class Service:
                 kwargs[kwarg] = (kwargs[kwarg], '==')
         kwargs = {key: kwargs[key] for key in kwargs if kwargs[key][0] is not None}
         return await self._repository.retrieve(self._response_schema, session, True, **kwargs)
-
-    async def update(
-            self, data: dict[str, Any], _id: int = Path(alias='id'), session: AsyncSession = db
-    ) -> None:
-        for key in data:
-            if key not in self._updatable_fields:
-                raise HTTPException(422)
-        return await self._repository.update(_id, data, session)
-
-    async def delete(self, _id: int = Path(alias='id'), session: AsyncSession = db) -> None:
-        return await self._repository.delete(_id, session)

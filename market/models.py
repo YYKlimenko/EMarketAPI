@@ -1,5 +1,4 @@
-from sqlalchemy import BINARY, Boolean, Column, DateTime, DECIMAL, ForeignKey, Integer, String, Table, \
-    create_engine, MetaData
+from sqlalchemy import Boolean, Column, DateTime, DECIMAL, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship, declarative_base
 
 
@@ -8,8 +7,8 @@ TableModel = declarative_base()
 ProductOrderLink = Table(
     'product_order_link',
     TableModel.metadata,
-    Column('order_id', ForeignKey('orders.id'), primary_key=True),
-    Column('product_id', ForeignKey('products.id'), primary_key=True)
+    Column('order_id', ForeignKey('orders.id', ondelete='CASCADE'), primary_key=True),
+    Column('product_id', ForeignKey('products.id', ondelete='CASCADE'), primary_key=True)
 )
 
 

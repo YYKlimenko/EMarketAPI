@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from bcrypt import gensalt, hashpw
-from fastapi import UploadFile, Form, Depends, Path, HTTPException
+from fastapi import UploadFile, Form, Depends, HTTPException, Path
 from pydantic import Field
 from sqlalchemy.engine import Row
 from sqlalchemy.exc import IntegrityError
@@ -9,12 +9,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.services.dataclasses import SignFloat
 from core.settings import db
-from core.services.services import Service
+from core.services.services import Service, DeleteUpdateMixin
+from market.repositories import OrderAsyncPostgresRepository
 from market.utils.image_edit import ImageFileUploader, ImageFileDeleter
-from market.schemas import (
-    CreatingCategory, Category, Product, CreatingProduct, Image, CreatingImage,
-    CreatingOrder, Order, CreatingUser, User
-)
+from market.schemas import CreatingCategory, CreatingProduct, CreatingOrder, CreatingUser, Order, \
+    Product
 
 
 class CategoryService(Service):
@@ -86,30 +85,62 @@ class UserService(Service):
         return await super()._retrieve_list(session, username=username, number=number)
 
 
-class OrderService(Service):
+class OrderService(DeleteUpdateMixin):
 
-    async def create(self, order: CreatingOrder, session: AsyncSession = db) -> None:
-        products = await self._repository.get_relations(Product, order.products_id, session)
+    def __init__(self, repository: OrderAsyncPostgresRepository):
+        self._repository = repository
+
+    async def create(self, instance: CreatingOrder, session: AsyncSession = db) -> None:
+        products = await self._repository.get_products('product', instance.products, session)
         if len(products) == 0:
             raise HTTPException(422)
-        await self._repository.create(self._model, {**order.dict(), 'products': products}, session)
+        instance_data = instance.dict()
+        instance_data.pop('products')
+        instance_data['products'] = products
+        return await self._repository.create(instance_data, session)
 
-    # async def retrieve_by_id(self, _id: int = Path(alias='id'), session: AsyncSession = db) -> Row:
-    #     order = await self._repository.retrieve(self._model, self._fields, session, id=(_id, '=='))
-    #     products = await self._repository.retrieve(
-    #         ProductOrder, [ProductOrder.product_id, ], session, True, order_id=(_id, '==')
-    #     )
-    #     return self._creating_model(**order, products_id=[product[0] for product in products])
+    async def retrieve_by_id(
+            self, _id: int = Path(alias='id'), session: AsyncSession = db
+    ) -> Order:
+        order_product = await self._repository.retrieve_with_products(session, _id=_id)
+        order = None
+        for row in order_product:
+            if order is None:
+                order = Order(id=row.order_id, user_id=row.user_id, products=[])
+            order.products.append(
+                Product(
+                    id=row.product_id,
+                    name=row.name,
+                    description=row.description,
+                    constitution=row.constitution,
+                    price=row.price,
+                    category_id=row.category_id
+                )
+            )
+        return order
 
-    # async def retrieve_list(self, session: AsyncSession = db) -> list[Row]:
-    #     query = select(self._model, Product.id).outerjoin(self._model.products)
-    #     orders_products = await session.execute(query.order_by(self._model.id))
-    #     orders = {}
-    #     for order_product in orders_products:
-    #         order = order_product[0].dict()
-    #         if orders.get(order['id']):
-    #             orders[order['id']]['products_id'].add(order_product[1])
-    #         else:
-    #             order['products_id'] = {order_product[1]}
-    #             orders[order['id']] = order
-    #     return list(orders.values())
+    async def retrieve_list(
+            self, session: AsyncSession = db, user_id: int | None = None
+    ) -> list[Order]:
+        order_product = await self._repository.retrieve_with_products(
+            session, many=True, user_id=user_id
+        )
+        orders = {}
+        for row in order_product:
+            if row.order_id not in orders:
+                orders[row.order_id] = Order(
+                    id=row.order_id,
+                    user_id=row.user_id,
+                    products=[]
+                )
+            orders[row.order_id].products.append(
+                Product(
+                        id=row.product_id,
+                        name=row.name,
+                        description=row.description,
+                        constitution=row.constitution,
+                        price=row.price,
+                        category_id=row.category_id
+                )
+            )
+        return list(orders.values())

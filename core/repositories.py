@@ -12,8 +12,9 @@ from market.models import TableModel
 
 class SQLAsyncRepository(RepositoryInterface):
 
-    def __init__(self, model: TableModel):
+    def __init__(self, model: TableModel, relations: dict[str, TableModel] | None = None) -> None:
         self.model: TableModel = model
+        self.relations: dict[str, TableModel] | None = relations
 
     async def create(self, fields: dict[str, Any], session: AsyncSession) -> None:
         session.add(self.model(**fields))
@@ -38,11 +39,6 @@ class SQLAsyncRepository(RepositoryInterface):
     async def delete(self, _id, session: AsyncSession):
         query = delete(self.model).where(self.model.id == _id)
         return await SQLAsyncRepository.commit(session, query)
-
-    # @staticmethod
-    # async def get_relations(relation: Model, foreign_key: Any, session: AsyncSession) -> list[Row]:
-    #     query = select(relation).where(relation.id.in_(foreign_key))
-    #     return (await session.execute(query)).scalars().all()
 
     async def get_filters(self, kws: dict[str, Any]) -> list:
         return [

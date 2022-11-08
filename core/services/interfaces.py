@@ -4,8 +4,6 @@ from pydantic import BaseModel
 from sqlalchemy.engine import Row
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from market.models import TableModel as Model
-
 
 class RepositoryInterface(Protocol):
 
@@ -23,15 +21,9 @@ class RepositoryInterface(Protocol):
     async def delete(self, _id, session: AsyncSession):
         raise NotImplementedError
 
-    # @staticmethod
-    # async def get_relations(relation: Model, foreign_key: Any, session: AsyncSession) -> list[Row]:
-    #     raise NotImplementedError
-
     async def get_filters(self, kws: dict[str, Any]) -> list:
         raise NotImplementedError
 
     @staticmethod
     async def commit(session: AsyncSession, query=None) -> None:
         raise NotImplementedError
-
-

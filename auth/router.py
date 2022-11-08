@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends
 
 
 from market.models import UserModel
-from auth.repositories import SQLAuthorizationRepository
-from auth.service import AuthorizationService
+from auth.services.repositories import SQLAuthorizationRepository
+from auth.services.service import AuthorizationService
 from auth.settings import SECRET_KEY
 router = APIRouter(tags=['Authorization & Authentication'])
 

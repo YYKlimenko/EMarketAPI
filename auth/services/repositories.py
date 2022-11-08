@@ -1,7 +1,6 @@
 from typing import Any
 
 from sqlalchemy import select
-from sqlalchemy.engine import Row
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth.interfaces import AuthorizationRepository

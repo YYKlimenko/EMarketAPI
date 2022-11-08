@@ -1,17 +1,14 @@
 from datetime import datetime, timedelta
-from typing import AsyncGenerator
+from typing import Any
 
-import bcrypt
 import jwt
 from bcrypt import checkpw
-from fastapi import Body, HTTPException, Security, Depends
+from fastapi import Body, HTTPException, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.settings import db
 from auth.interfaces import AuthorizationRepository
-from market.services import UserService
-from .settings import  get_async_session
 
 
 class AuthorizationService:
@@ -45,7 +42,7 @@ class Authenticator:
     def __init__(self, key: str) -> None:
         self._key = key
 
-    def decode_jwt(self, token: str):
+    def decode_jwt(self, token: str) -> dict[str, Any]:
         try:
             payload = jwt.decode(token, self._key, algorithms=['HS256'])
             return payload
@@ -56,5 +53,5 @@ class Authenticator:
 
     def handle_auth(
             self, auth: HTTPAuthorizationCredentials = Security(HTTPBearer())
-    ):
+    ) -> dict[str, Any]:
         return self.decode_jwt(auth.credentials)

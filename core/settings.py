@@ -6,7 +6,6 @@ from sqlalchemy.orm import sessionmaker
 
 
 # from auth.models import User
-from core.repositories import SQLAsyncRepository
 
 
 SECRET_KEY = 'KYKOYAKO'

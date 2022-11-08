@@ -8,7 +8,7 @@ from market.schemas import Product, CreatingProduct
 
 router = APIRouter(tags=['Products'])
 repository = SQLAsyncRepository(ProductModel)
-service = ProductService(repository, Product, CreatingProduct)
+service = ProductService(repository, CreatingProduct, Product)
 
 
 @router.get('/products/')
