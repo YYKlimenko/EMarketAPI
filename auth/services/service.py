@@ -7,8 +7,8 @@ from fastapi import Body, HTTPException, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.settings import db
-from auth.interfaces import AuthorizationRepository
+from auth.services.interfaces import AuthorizationRepository
+from auth.settings import DB_CONNECTOR
 
 
 class AuthorizationService:
@@ -29,7 +29,7 @@ class AuthorizationService:
             self,
             login: str = Body(...),
             password: str = Body(...),
-            session: AsyncSession = db
+            session: AsyncSession = DB_CONNECTOR
     ) -> dict[str, str]:
         user = await self._repository.get_auth_data('username', login, session)
         if user and checkpw(password.encode(), user['password'].encode()):

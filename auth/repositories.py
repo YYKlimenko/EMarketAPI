@@ -2,15 +2,15 @@ from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import declarative_base
 
-from auth.interfaces import AuthorizationRepository
-from market.models import TableModel
+from auth.services.interfaces import AuthorizationRepository
 
 
 class SQLAuthorizationRepository(AuthorizationRepository):
 
-    def __init__(self, model: TableModel):
-        self.model: TableModel = model
+    def __init__(self, model: declarative_base()):
+        self.model: declarative_base() = model
 
     async def get_auth_data(
             self, field: str, value: Any, session: AsyncSession, password_field: str = 'password'
