@@ -11,6 +11,7 @@ DEBUG = True
 
 SECRET_KEY = 'KYKOYAKO'
 USER_MODEL = UserModel
+SUPERUSERS = {1}
 
 """Настройка подключения к SQL-БД"""
 if DEBUG:
