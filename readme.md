@@ -1,18 +1,17 @@
-Проект API с расширяемой архитектурой для интернет-магазина (и других сервисов)
+### API with for an online market 
 
-Стек: <br>
 Python 3.10  <br>
-fastapi + SQLModel (оболочка над SQLAlchemy и Pydantic от создателей FastAPI) <br>
-Прочие зависимости: см. requiremets.txt
+FastAPI + SQLAlchemy<br>
+<i>Other dependencies: look requirements.txt</i>
 
-В проекте реализовано: <br>
-Асинхронная работа с БД и всего APi в целом; <br>
-Слой репозиториев для работы с БД. В проекте реализован репозиторий для асинхронной работы с SQL-БД; <br>
-Репозитории предлагают удобные интерфейсы для выполнения запросов;<br>
-Слой сервисов для бизнес-логики написан с использованием мета-классов для сокращения количества кода<br>
-с учетом аннотации типов и удобного расширения архитектуры; <br>
-Модели используемых сущностей созданы с использованием SQLModel (pydantic+sqlalchemy) ;<br>
-Система JWT аутентификации и авторизации, выделана в отдельное приложение; <br>
-Использование Docker-контейнеров для удобного деплоя, разработки и поддержки. <br>
+It's implemented in the project: <br>
+- Total async work with Database and API at all; <br>
+- The async repositories layer for work with Database; <br>
+- JWT auth at the separated layer; <br>
+- Docker container<br>
 
-<i> Протестировано с postgresql </i>
+<i> Tested with postgresql </i>
+
+
+
+###### <i> PS: I'm sorry for my English. but I hope for your understanding!)
