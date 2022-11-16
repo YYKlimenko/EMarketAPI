@@ -3,15 +3,15 @@ from sqlalchemy.engine import Row
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.repositories import SQLAsyncRepository
+from market.models import ProductModel
 
 
 class OrderAsyncPostgresRepository(SQLAsyncRepository):
 
     async def get_products(
-            self, relation: str, foreign_keys: list[int], session: AsyncSession
+            self, foreign_keys: list[int], session: AsyncSession
     ) -> list[Row]:
-        relation = self.relations[relation]
-        query = select(relation).where(relation.id.in_(foreign_keys))
+        query = select(ProductModel).where(ProductModel.id.in_(foreign_keys))
         return (await session.execute(query)).scalars().all()
 
     async def retrieve_with_products(

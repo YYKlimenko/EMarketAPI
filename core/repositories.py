@@ -12,9 +12,8 @@ from market.models import TableModel
 
 class SQLAsyncRepository(RepositoryInterface):
 
-    def __init__(self, model: TableModel, relations: dict[str, TableModel] | None = None) -> None:
+    def __init__(self, model: TableModel) -> None:
         self.model: TableModel = model
-        self.relations: dict[str, TableModel] | None = relations
 
     async def create(self, fields: dict[str, Any], session: AsyncSession) -> None:
         session.add(self.model(**fields))

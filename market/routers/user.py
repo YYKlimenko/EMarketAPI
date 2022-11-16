@@ -1,9 +1,7 @@
 from fastapi import APIRouter, Depends
 
-from core.permissions.permissions import PERMIT_FOR_ADMIN, PERMIT_FOR_OWNER
 from market.schemas import User
-from market.objects import user_service as service
-
+from market.objects import user_service as service, PERMIT_FOR_ADMIN, PERMIT_FOR_USER
 
 router = APIRouter(tags=['Users'])
 
@@ -22,7 +20,7 @@ async def get_users(response: list[User] = Depends(service.retrieve_list)):
     '/users/{id}',
     status_code=200,
     description='Get the user',
-    dependencies=[PERMIT_FOR_OWNER]
+    dependencies=[PERMIT_FOR_USER]
 )
 async def get_user(response: User = Depends(service.retrieve_by_id)):
     return response
@@ -32,7 +30,7 @@ async def get_user(response: User = Depends(service.retrieve_by_id)):
     '/users/{id}',
     status_code=202,
     description='Delete the user',
-    dependencies=[PERMIT_FOR_ADMIN]
+    dependencies=[PERMIT_FOR_USER]
 )
 async def delete_user(response: None = Depends(service.delete)):
     return response
@@ -47,7 +45,7 @@ def registrate_user(response: None = Depends(service.registrate)):
     '/users/{id}',
     status_code=202,
     description='Change user data',
-    dependencies=[PERMIT_FOR_ADMIN]
+    dependencies=[PERMIT_FOR_USER]
 )
 def change_user_data(response: None = Depends(service.update)) -> None:
     return response

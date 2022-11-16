@@ -19,7 +19,7 @@ class ProductModel(TableModel):
     name = Column(String(60), nullable=False)
     description = Column(String(1000), nullable=False)
     constitution = Column(String(1000), nullable=False)
-    price = Column(DECIMAL(), nullable=False)
+    price = Column(DECIMAL(10, 3), nullable=False)
     category_id = Column(Integer, ForeignKey('categories.id'))
 
     category = relationship('CategoryModel', back_populates='products')

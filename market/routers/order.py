@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends
 
-from core.permissions.permissions import PERMIT_FOR_ADMIN, PERMIT_FOR_OWNER
 from market.schemas import Order
-from market.objects import order_service as service
-
+from market.objects import (
+    order_service as service, PERMIT_FOR_OWNER, PERMIT_POST_ORDER_FOR_OWNER, PERMIT_FOR_ADMIN,
+    PERMIT_GET_ORDER_FOR_OWNER
+)
 
 router = APIRouter(tags=['Orders'])
 
@@ -22,7 +23,7 @@ async def get_orders(response: list[Order] = Depends(service.retrieve_list)):
     '/order/{id}',
     status_code=200,
     description='Get the order',
-    dependencies=[PERMIT_FOR_OWNER]
+    dependencies=[PERMIT_GET_ORDER_FOR_OWNER]
 )
 async def get_order(response: Order = Depends(service.retrieve_by_id)) -> Order:
     return response
@@ -32,7 +33,7 @@ async def get_order(response: Order = Depends(service.retrieve_by_id)) -> Order:
     '/orders/',
     status_code=201,
     description='Create the order',
-    dependencies=[PERMIT_FOR_OWNER]
+    dependencies=[PERMIT_POST_ORDER_FOR_OWNER]
 )
 async def post_order(response: None = Depends(service.create)) -> None:
     return response
@@ -52,7 +53,7 @@ async def put_order(response: None = Depends(service.update)) -> None:
     '/orders/{id}',
     status_code=202,
     description='Delete the order',
-    dependencies=[PERMIT_FOR_ADMIN]
+    dependencies=[PERMIT_GET_ORDER_FOR_OWNER]
 )
 async def delete_order(response: None = Depends(service.delete)) -> None:
     return response

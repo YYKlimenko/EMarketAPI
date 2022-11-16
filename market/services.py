@@ -7,6 +7,7 @@ from sqlalchemy.engine import Row
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+import loggers
 from core.services.dataclasses import SignFloat
 from core.settings import db
 from core.services.services import Service, DeleteUpdateMixin
@@ -92,7 +93,7 @@ class OrderService(DeleteUpdateMixin):
         self._updatable_fields = updatable_fields
 
     async def create(self, instance: CreatingOrder, session: AsyncSession = db) -> None:
-        products = await self._repository.get_products('product', instance.products, session)
+        products = await self._repository.get_products(instance.products, session)
         if len(products) == 0:
             raise HTTPException(422)
         instance_data = instance.dict()
@@ -108,6 +109,7 @@ class OrderService(DeleteUpdateMixin):
         for row in order_product:
             if order is None:
                 order = Order(id=row.order_id, user_id=row.user_id, products=[])
+            loggers.logger.debug(row.price)
             order.products.append(
                 Product(
                     id=row.product_id,
@@ -134,6 +136,7 @@ class OrderService(DeleteUpdateMixin):
                     user_id=row.user_id,
                     products=[]
                 )
+                loggers.logger.debug('row.price')
             orders[row.order_id].products.append(
                 Product(
                         id=row.product_id,

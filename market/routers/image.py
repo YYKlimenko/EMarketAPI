@@ -1,9 +1,7 @@
 from fastapi import APIRouter, Depends
 
-from core.permissions.permissions import permit_for_admin
 from market.schemas import Image
-from market.objects import image_service as service
-
+from market.objects import image_service as service, PERMIT_FOR_ADMIN
 
 router = APIRouter(tags=['Images'])
 
@@ -30,7 +28,7 @@ async def get_image(response: Image = Depends(service.retrieve_by_id)):
     '/images/',
     status_code=202,
     description='Create the image',
-    dependencies=[Depends(permit_for_admin)]
+    dependencies=[PERMIT_FOR_ADMIN]
 )
 async def post_image(response: None = Depends(service.create_image)):
     return response
@@ -40,7 +38,7 @@ async def post_image(response: None = Depends(service.create_image)):
     '/images/{id}',
     status_code=202,
     description='Delete the image',
-    dependencies=[Depends(permit_for_admin)]
+    dependencies=[PERMIT_FOR_ADMIN]
 )
 async def delete_image(response: None = Depends(service.delete_image)):
     return response

@@ -1,9 +1,7 @@
 from fastapi import APIRouter, Depends
 
-from core.permissions.permissions import PERMIT_FOR_ADMIN
 from market.schemas import Product
-from market.objects import product_service as service
-
+from market.objects import product_service as service, PERMIT_FOR_ADMIN
 
 router = APIRouter(tags=['Products'])
 

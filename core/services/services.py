@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import Any
 
 from fastapi import HTTPException, Path, Depends
@@ -6,6 +7,7 @@ from sqlalchemy.engine import Row
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+import loggers
 from core.services.dataclasses import SignValue
 from core.services.interfaces import RepositoryInterface
 from core.settings import get_async_session
