@@ -7,7 +7,6 @@ from sqlalchemy.engine import Row
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-import loggers
 from core.services.dataclasses import SignFloat
 from core.settings import db
 from core.services.services import Service, DeleteUpdateMixin
@@ -18,6 +17,7 @@ from market.schemas import CreatingCategory, CreatingProduct, CreatingOrder, Cre
 
 
 class CategoryService(Service):
+
     async def create(self, instance: CreatingCategory, session: AsyncSession = db) -> None:
         return await super()._create(instance, session)
 
@@ -26,6 +26,7 @@ class CategoryService(Service):
 
 
 class ProductService(Service):
+
     class SignPrice(SignFloat):
         sign_value: str | None = Field(default=None, alias='price')
 
@@ -38,14 +39,51 @@ class ProductService(Service):
             name: str | None = None,
             price: str | None = Depends(SignPrice),
             category_id: int | None = None
-    ) -> list[Row]:
-        return await super()._retrieve_list(
-            session, name=name, price=price, category_id=category_id
+    ) -> list[Product]:
+        raw_products = await self._repository.retrieve_with_images(
+            session, many=True, name=name, price=price, category_id=category_id
         )
+        products = {}
+        for row in raw_products:
+            if row.product_id not in products:
+                products[row.product_id] = Product(
+                        id=row.product_id,
+                        name=row.name,
+                        description=row.description,
+                        constitution=row.constitution,
+                        price=row.price,
+                        category_id=row.category_id,
+                        images=[]
+                )
+            if row.image_id:
+                products[row.product_id].images.append({'id': row.image_id, 'url': row.url})
+
+        return list(products.values())
+
+    async def retrieve_by_id(
+            self,
+            session: AsyncSession = db,
+            _id: int = Path(alias='id')
+    ) -> Product | None:
+        raw_product = await self._repository.retrieve_with_images(session, _id=_id)
+        product = None
+        for n, row in enumerate(raw_product):
+            if n == 0:
+                product = Product(
+                        id=row.product_id,
+                        name=row.name,
+                        description=row.description,
+                        constitution=row.constitution,
+                        price=row.price,
+                        category_id=row.category_id,
+                        images=[]
+                )
+            if row.image_id:
+                product.images.append({'id': row.image_id, 'url': row.url})
+        return product
 
 
 class ImageService(Service):
-
     async def create_image(
             self,
             file: UploadFile,
@@ -109,7 +147,6 @@ class OrderService(DeleteUpdateMixin):
         for row in order_product:
             if order is None:
                 order = Order(id=row.order_id, user_id=row.user_id, products=[])
-            loggers.logger.debug(row.price)
             order.products.append(
                 Product(
                     id=row.product_id,
@@ -136,7 +173,6 @@ class OrderService(DeleteUpdateMixin):
                     user_id=row.user_id,
                     products=[]
                 )
-                loggers.logger.debug('row.price')
             orders[row.order_id].products.append(
                 Product(
                         id=row.product_id,
