@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile, Form
+from sqlalchemy.engine import Row
 
-from market.schemas import Image
-from market.objects import image_service as service, PERMIT_FOR_ADMIN
+from market.objects import PERMIT_FOR_ADMIN
+from market.services import ImageService
 
 router = APIRouter(tags=['Images'])
 
@@ -11,8 +12,8 @@ router = APIRouter(tags=['Images'])
     status_code=200,
     description='Get a list of images',
 )
-async def get_images(response: list[Image] = Depends(service.retrieve_list)):
-    return response
+async def get_images(product_id: int | None = None, service: ImageService = Depends()) -> list[Row]:
+    return await service.retrieve_list(product_id=product_id)
 
 
 @router.get(
@@ -20,8 +21,8 @@ async def get_images(response: list[Image] = Depends(service.retrieve_list)):
     status_code=200,
     description='Get the image',
 )
-async def get_image(response: Image = Depends(service.retrieve_by_id)):
-    return response
+async def get_image(_id: int, service: ImageService = Depends()) -> Row:
+    return await service.retrieve_by_id(_id)
 
 
 @router.post(
@@ -30,8 +31,10 @@ async def get_image(response: Image = Depends(service.retrieve_by_id)):
     description='Create the image',
     dependencies=[PERMIT_FOR_ADMIN]
 )
-async def post_image(response: None = Depends(service.create_image)):
-    return response
+async def post_image(
+        file: UploadFile, product_id: int = Form(), service: ImageService = Depends()
+) -> None:
+    return await service.create_image(file, product_id)
 
 
 @router.delete(
@@ -40,5 +43,5 @@ async def post_image(response: None = Depends(service.create_image)):
     description='Delete the image',
     dependencies=[PERMIT_FOR_ADMIN]
 )
-async def delete_image(response: None = Depends(service.delete_image)):
-    return response
+async def delete_image(_id: int, service: ImageService = Depends()) -> None:
+    return await service.delete(_id)

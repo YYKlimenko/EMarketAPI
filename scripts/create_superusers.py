@@ -3,7 +3,7 @@ import datetime
 
 from bcrypt import hashpw, gensalt
 
-from core.settings import session
+from core.settings import session_maker
 from market.models import TableModel, UserModel  # noqa: F401
 
 
@@ -21,6 +21,4 @@ async def create_superuser(session):
 
 
 if __name__ == '__main__':
-    asyncio.run(create_superuser(session))
-
-
+    asyncio.run(create_superuser(session_maker))

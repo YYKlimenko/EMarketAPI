@@ -3,19 +3,18 @@ from typing import Any
 
 import jwt
 from bcrypt import checkpw
-from fastapi import Body, HTTPException, Security
+from fastapi import Body, HTTPException, Security, Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from auth.services.interfaces import AuthorizationRepository
-from auth.settings import DB_CONNECTOR
+from auth.repositories import SQLAuthorizationRepository
+from auth.settings import SECRET_KEY
 
 
 class AuthorizationService:
+    hash_key = SECRET_KEY
 
-    def __init__(self, hash_key: str, repository: AuthorizationRepository):
-        self._hash_key = hash_key
-        self._repository = repository
+    def __init__(self, repository=Depends(SQLAuthorizationRepository)):
+        self.repository = repository
 
     def encode_jwt(self, user_id: int):
         payload = {
@@ -23,15 +22,14 @@ class AuthorizationService:
             'iat': datetime.utcnow(),
             'sub': user_id
         }
-        return jwt.encode(payload, self._hash_key, algorithm='HS256')
+        return jwt.encode(payload, self.hash_key, algorithm='HS256')
 
     async def authorize(
             self,
             login: str = Body(...),
             password: str = Body(...),
-            session: AsyncSession = DB_CONNECTOR
     ) -> dict[str, str]:
-        user = await self._repository.get_auth_data('username', login, session)
+        user = await self.repository.get_auth_data('username', login)
         if user and checkpw(password.encode(), user['password'].encode()):
             return {"access_token": self.encode_jwt(user['id']), "token_type": "bearer"}
         else:

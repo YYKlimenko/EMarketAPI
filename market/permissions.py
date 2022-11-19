@@ -4,9 +4,9 @@ from fastapi import Depends, HTTPException, Path
 from pydantic import BaseModel
 
 from auth.objects import authenticator
-from core.permissions.permissions import permit_for_admin, permit_for_owner, is_admin
+from core.permissions.permissions import permit_for_owner, is_admin
 from core.repositories import SQLAsyncRepository
-from core.settings import session
+from core.settings import session_maker
 from market.models import OrderModel
 from market.schemas import CreatingOrder
 
@@ -15,12 +15,12 @@ async def permit_get_order_for_owner(
         order_id: int | None = Path(alias='id'),
         auth_data: dict[str, Any] = Depends(authenticator.handle_auth)
 ):
-    repository = SQLAsyncRepository(OrderModel)
+    repository = SQLAsyncRepository(OrderModel, session_maker)
 
     class user_id(BaseModel):
         user_id: int
 
-    order = await repository.retrieve(data=user_id, session=session(), id=(order_id, '=='))
+    order = await repository.retrieve(data=user_id, id=(order_id, '=='))
     if order:
         return permit_for_owner(order.user_id, auth_data)
 

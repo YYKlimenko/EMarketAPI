@@ -26,7 +26,7 @@ class Product(CreatingProduct, ID):
     """
     Pydantic schema for retrieve Product instance from DB
     """
-    pass
+    images: list
 
 
 class CreatingCategory(BaseModel):
@@ -122,4 +122,4 @@ class Order(BaseOrder, ID):
     """
       Pydantic schema for retrieve Order instance from DB
       """
-    products: list[Product]
+    products: dict

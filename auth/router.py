@@ -1,9 +1,13 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Body
 
-from auth.objects import auth_service
+from auth.service import AuthorizationService
 router = APIRouter(tags=['Authorization & Authentication'])
 
 
 @router.post('/authorization/', status_code=202, description='Authorize user')
-def authorize_user(response: dict[str, str] = Depends(auth_service.authorize)) -> dict[str, str]:
-    return response
+async def authorize_user(
+        login: str = Body(...),
+        password: str = Body(...),
+        service=Depends(AuthorizationService)
+) -> dict[str, str]:
+    return await service.authorize(login, password)

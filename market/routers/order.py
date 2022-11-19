@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Path
 
-from market.schemas import Order
+from market.schemas import Order, CreatingOrder
 from market.objects import (
-    order_service as service, PERMIT_FOR_OWNER, PERMIT_POST_ORDER_FOR_OWNER, PERMIT_FOR_ADMIN,
-    PERMIT_GET_ORDER_FOR_OWNER
+    PERMIT_FOR_OWNER, PERMIT_POST_ORDER_FOR_OWNER, PERMIT_FOR_ADMIN, PERMIT_GET_ORDER_FOR_OWNER
 )
+from market.services import OrderService
 
 router = APIRouter(tags=['Orders'])
 
@@ -15,8 +15,8 @@ router = APIRouter(tags=['Orders'])
     description='Get a list of orders',
     dependencies=[PERMIT_FOR_OWNER]
 )
-async def get_orders(response: list[Order] = Depends(service.retrieve_list)):
-    return response
+async def get_orders(service=Depends(OrderService)):
+    return await service.retrieve_list()
 
 
 @router.get(
@@ -25,8 +25,8 @@ async def get_orders(response: list[Order] = Depends(service.retrieve_list)):
     description='Get the order',
     dependencies=[PERMIT_GET_ORDER_FOR_OWNER]
 )
-async def get_order(response: Order = Depends(service.retrieve_by_id)) -> Order:
-    return response
+async def get_order(_id: int, service=Depends(OrderService)) -> Order:
+    return await service.retrieve_by_id(_id)
 
 
 @router.post(
@@ -35,8 +35,8 @@ async def get_order(response: Order = Depends(service.retrieve_by_id)) -> Order:
     description='Create the order',
     dependencies=[PERMIT_POST_ORDER_FOR_OWNER]
 )
-async def post_order(response: None = Depends(service.create)) -> None:
-    return response
+async def post_order(instance: CreatingOrder, service=Depends(OrderService)) -> None:
+    return await service.create(instance)
 
 
 @router.put(
@@ -45,8 +45,8 @@ async def post_order(response: None = Depends(service.create)) -> None:
     description='Update the order',
     dependencies=[PERMIT_FOR_ADMIN]
 )
-async def put_order(response: None = Depends(service.update)) -> None:
-    return response
+async def put_order(data: dict, _id: int, service=Depends(OrderService)) -> None:
+    return await service.put(data, _id)
 
 
 @router.delete(
@@ -55,5 +55,5 @@ async def put_order(response: None = Depends(service.update)) -> None:
     description='Delete the order',
     dependencies=[PERMIT_GET_ORDER_FOR_OWNER]
 )
-async def delete_order(response: None = Depends(service.delete)) -> None:
-    return response
+async def delete_order(_id: int = Path(alias="id"), service=Depends(OrderService)) -> None:
+    return await service.delete(_id)

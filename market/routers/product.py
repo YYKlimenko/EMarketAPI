@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends
 
-from market.schemas import Product
-from market.objects import product_service as service, PERMIT_FOR_ADMIN
+from market.schemas import Product, CreatingProduct
+from market.objects import PERMIT_FOR_ADMIN
+from market.dataclasses import SignPrice
+from market.services import ProductService
 
 router = APIRouter(tags=['Products'])
 
@@ -11,8 +13,13 @@ router = APIRouter(tags=['Products'])
     status_code=200,
     description='Get the product',
 )
-async def get_products(response=Depends(service.retrieve_list)) -> list[Product]:
-    return response
+async def get_products(
+        name: str | None = None,
+        price: str | None = Depends(SignPrice),
+        category_id: int | None = None,
+        service: ProductService = Depends()
+) -> list[Product]:
+    return await service.retrieve_list(name=name, price=price, category_id=category_id)
 
 
 @router.get(
@@ -20,8 +27,8 @@ async def get_products(response=Depends(service.retrieve_list)) -> list[Product]
     status_code=200,
     description='Get the products',
 )
-async def get_product(response=Depends(service.retrieve_by_id)) -> Product:
-    return response
+async def get_product(_id: int, service: ProductService = Depends()) -> Product:
+    return await service.retrieve_by_id(_id)
 
 
 @router.post(
@@ -30,8 +37,8 @@ async def get_product(response=Depends(service.retrieve_by_id)) -> Product:
     description='Create a new product',
     dependencies=[PERMIT_FOR_ADMIN]
 )
-async def post_product(response=Depends(service.create)) -> None:
-    return response
+async def post_product(product: CreatingProduct, service: ProductService = Depends()) -> None:
+    return await service.create(product)
 
 
 @router.put(
@@ -40,8 +47,8 @@ async def post_product(response=Depends(service.create)) -> None:
     description='Update the product',
     dependencies=[PERMIT_FOR_ADMIN]
 )
-async def put_product(response=Depends(service.update)) -> Product:
-    return response
+async def put_product(_id: int, data: dict, service: ProductService = Depends()) -> None:
+    return await service.update(data, _id)
 
 
 @router.delete(
@@ -50,5 +57,5 @@ async def put_product(response=Depends(service.update)) -> Product:
     description='Delete the product',
     dependencies=[PERMIT_FOR_ADMIN]
 )
-async def delete_product(response=Depends(service.delete)) -> Product:
-    return response
+async def delete_product(_id: int, service: ProductService = Depends()) -> None:
+    return await service.delete(_id)
