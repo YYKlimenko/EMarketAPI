@@ -1,6 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.engine import Row
 
+import loggers
 from core.repositories import SQLAsyncRepository
 from market.models import ProductModel, OrderModel, CategoryModel, ImageModel, UserModel
 
@@ -57,16 +58,27 @@ class ProductRepository(SQLAsyncRepository):
                      LEFT JOIN images as image ON product.id = image.product_id """ # noqa W291
 
         if many:
+
             count_kwargs = 0
             filters = []
-            for kwarg in ('name', 'category_id'):
+
+            for kwarg in ('name', 'category_id', 'price'):
                 if kwargs.get(kwarg) is not None:
                     word = 'WHERE' if count_kwargs == 0 else 'AND'
+
                     if kwarg == 'name':
                         filters.append(f"""{word} {kwarg} = '{kwargs[kwarg]}'""")
-                    else:
+
+                    elif kwarg == 'category_id':
                         filters.append(f"""{word} {kwarg} = {kwargs[kwarg]}""")
+
+                    elif kwarg == 'price':
+                        symbol = '=' if kwargs[kwarg][0] == '==' else kwargs[kwarg][0]
+                        filters.append(f"""{word} {kwarg} {symbol} {kwargs[kwarg][1]}""")
+
                     count_kwargs += 1
+
+
             raw_query = ' '.join([raw_query, *filters, ';'])
         else:
             filter_by_id = f"""WHERE product.id = {kwargs['_id']}"""  # noqa W291

@@ -31,9 +31,10 @@ def set_user_repository():
     engine = create_database_data()
     session_maker = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
     user_repository = SQLAsyncRepository(UserModel, session_maker)
-    user_service = UserService(user_repository, CreatingUser, User, ['number', 'username'])
+    UserService(user_repository, CreatingUser, User, ['number', 'username'])
 
     # app.dependency_overrides[service.retrieve_list] = override_get_db
+
 
 def test_get_users():
     response = client.get("/users/", headers={'Authorization': SUPERUSER_TOKEN})

@@ -5,9 +5,7 @@ from pydantic import BaseModel
 
 from auth.objects import authenticator
 from core.permissions.permissions import permit_for_owner, is_admin
-from core.repositories import SQLAsyncRepository
-from core.settings import session_maker
-from market.models import OrderModel
+from market.repositories import OrderRepository
 from market.schemas import CreatingOrder
 
 
@@ -15,7 +13,7 @@ async def permit_get_order_for_owner(
         order_id: int | None = Path(alias='id'),
         auth_data: dict[str, Any] = Depends(authenticator.handle_auth)
 ):
-    repository = SQLAsyncRepository(OrderModel, session_maker)
+    repository = OrderRepository()
 
     class user_id(BaseModel):
         user_id: int

@@ -4,6 +4,7 @@ from bcrypt import gensalt, hashpw
 from fastapi import UploadFile, Depends, HTTPException, Path
 from sqlalchemy.exc import IntegrityError
 
+import loggers
 from core.services.services import Service, DeleteUpdateMixin
 from market.repositories import (
     CategoryRepository, ImageRepository, ProductRepository, UserRepository, OrderRepository
@@ -35,8 +36,9 @@ class ProductService(Service):
     async def retrieve_list(
             self, name: str | None, price: str | None, category_id: int | None
     ) -> list[Product]:
+
         raw_products = await self.repository.retrieve_with_images(
-            many=True, name=name, price=price, category_id=category_id
+            many=True, name=name, price=(price.sign, price.value), category_id=category_id
         )
 
         products = {}

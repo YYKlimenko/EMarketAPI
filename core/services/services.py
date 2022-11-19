@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import HTTPException, Path, Depends
+from fastapi import HTTPException, Path
 from pydantic import BaseModel
 from sqlalchemy.engine import Row
 from sqlalchemy.exc import IntegrityError
@@ -33,7 +33,7 @@ class Service(DeleteUpdateMixin):
         if not self.updatable_fields:
             self.updatable_fields: list[Any] | None = [
                 attr for attr in self.response_schema.__fields__ if attr != 'id'
-        ]
+            ]
 
     async def create(self, instance: BaseModel):
         try:
