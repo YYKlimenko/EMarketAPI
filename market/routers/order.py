@@ -25,7 +25,7 @@ async def get_orders(service=Depends(OrderService)):
     description='Get the order',
     dependencies=[PERMIT_GET_ORDER_FOR_OWNER]
 )
-async def get_order(_id: int, service=Depends(OrderService)) -> Order:
+async def get_order(_id: int = Path(alias='id'), service=Depends(OrderService)) -> Order:
     return await service.retrieve_by_id(_id)
 
 
@@ -45,7 +45,7 @@ async def post_order(instance: CreatingOrder, service=Depends(OrderService)) -> 
     description='Update the order',
     dependencies=[PERMIT_FOR_ADMIN]
 )
-async def put_order(data: dict, _id: int, service=Depends(OrderService)) -> None:
+async def put_order(data: dict, _id: int = Path(alias='id'), service=Depends(OrderService)) -> None:
     return await service.put(data, _id)
 
 

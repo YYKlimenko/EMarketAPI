@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, Form
+from fastapi import APIRouter, Depends, UploadFile, Form, Path
 from sqlalchemy.engine import Row
 
 from market.objects import PERMIT_FOR_ADMIN
@@ -21,7 +21,7 @@ async def get_images(product_id: int | None = None, service: ImageService = Depe
     status_code=200,
     description='Get the image',
 )
-async def get_image(_id: int, service: ImageService = Depends()) -> Row:
+async def get_image(_id: int = Path(alias='id'), service: ImageService = Depends()) -> Row:
     return await service.retrieve_by_id(_id)
 
 
@@ -43,5 +43,5 @@ async def post_image(
     description='Delete the image',
     dependencies=[PERMIT_FOR_ADMIN]
 )
-async def delete_image(_id: int, service: ImageService = Depends()) -> None:
+async def delete_image(_id: int = Path(alias='id'), service: ImageService = Depends()) -> None:
     return await service.delete(_id)

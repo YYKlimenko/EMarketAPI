@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Path
 
 from market.schemas import Category, CreatingCategory
 from market.objects import PERMIT_FOR_ADMIN
@@ -14,7 +14,9 @@ router = APIRouter(tags=['Categories'])
     status_code=200,
     description='Get the categories',
 )
-async def get_categories(name: str | None = None, service=Depends(CategoryService)):
+async def get_categories(
+        name: str | None = None, service=Depends(CategoryService)
+) -> list[Category]:
     return await service.retrieve_list(name=name)
 
 
@@ -23,8 +25,8 @@ async def get_categories(name: str | None = None, service=Depends(CategoryServic
     status_code=200,
     description='Get the category',
 )
-async def get_category(category_id: int, service=Depends(CategoryService)) -> Category:
-    return await service.retrieve_by_id(category_id)
+async def get_category(_id: int = Path(alias='id'), service=Depends(CategoryService)) -> Category:
+    return await service.retrieve_by_id(_id)
 
 
 @router.post(
@@ -44,9 +46,9 @@ async def post_category(category: CreatingCategory, service=Depends(CategoryServ
     dependencies=[PERMIT_FOR_ADMIN]
 )
 async def put_category(
-        data: dict[str, Any], category_id: int, service=Depends(CategoryService)
+        data: dict[str, Any], _id: int = Path(alias='id'), service=Depends(CategoryService)
 ) -> None:
-    return await service.update(data, category_id)
+    return await service.update(data, _id)
 
 
 @router.delete(
@@ -55,5 +57,5 @@ async def put_category(
     description='The category is deleted',
     dependencies=[PERMIT_FOR_ADMIN]
 )
-async def delete_category(category_id: int, service=Depends(CategoryService)) -> None:
-    return await service.delete(category_id)
+async def delete_category(_id: int = Path(alias='id'), service=Depends(CategoryService)) -> None:
+    return await service.delete(_id)

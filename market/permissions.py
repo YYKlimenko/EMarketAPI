@@ -10,7 +10,7 @@ from market.schemas import CreatingOrder
 
 
 async def permit_get_order_for_owner(
-        order_id: int | None = Path(alias='id'),
+        order_id: int | None = Path(alias='_id'),
         auth_data: dict[str, Any] = Depends(authenticator.handle_auth)
 ):
     repository = OrderRepository()

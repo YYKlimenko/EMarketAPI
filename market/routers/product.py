@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Path
 
 from market.schemas import Product, CreatingProduct
 from market.objects import PERMIT_FOR_ADMIN
@@ -27,7 +27,7 @@ async def get_products(
     status_code=200,
     description='Get the products',
 )
-async def get_product(_id: int, service: ProductService = Depends()) -> Product:
+async def get_product(_id: int = Path(alias='id'), service: ProductService = Depends()) -> Product:
     return await service.retrieve_by_id(_id)
 
 
@@ -47,7 +47,9 @@ async def post_product(product: CreatingProduct, service: ProductService = Depen
     description='Update the product',
     dependencies=[PERMIT_FOR_ADMIN]
 )
-async def put_product(_id: int, data: dict, service: ProductService = Depends()) -> None:
+async def put_product(
+        data: dict, _id: int = Path(alias='id'), service: ProductService = Depends()
+) -> None:
     return await service.update(data, _id)
 
 
@@ -57,5 +59,5 @@ async def put_product(_id: int, data: dict, service: ProductService = Depends())
     description='Delete the product',
     dependencies=[PERMIT_FOR_ADMIN]
 )
-async def delete_product(_id: int, service: ProductService = Depends()) -> None:
+async def delete_product(_id: int = Path(alias='id'), service: ProductService = Depends()) -> None:
     return await service.delete(_id)

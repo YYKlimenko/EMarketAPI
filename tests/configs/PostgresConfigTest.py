@@ -2,14 +2,12 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from core.settings import LOGIN_DB, PASSWORD_DB
-from market.configs.Config import Config
 
 
-class PostgresConfig(Config):
+class PostgresConfigTest:
     DIALECT_DB = 'postgresql'
     DRIVER_DB = 'asyncpg'
-    URL_DB = f'{LOGIN_DB}:{PASSWORD_DB}@localhost:5432/market'
-    URL_TEST_DB = f'{LOGIN_DB}:{PASSWORD_DB}@localhost:5432/test_market'
+    URL_DB = f'{LOGIN_DB}:{PASSWORD_DB}@localhost:5432/test_market'
 
     def get_engine(self):
         return create_async_engine(

@@ -1,8 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.engine import Row
 
-import loggers
-from core.repositories import SQLAsyncRepository
+from core.repositories.repositories import SQLAsyncRepository
 from market.models import ProductModel, OrderModel, CategoryModel, ImageModel, UserModel
 
 
@@ -77,7 +76,6 @@ class ProductRepository(SQLAsyncRepository):
                         filters.append(f"""{word} {kwarg} {symbol} {kwargs[kwarg][1]}""")
 
                     count_kwargs += 1
-
 
             raw_query = ' '.join([raw_query, *filters, ';'])
         else:

@@ -1,10 +1,10 @@
 from datetime import datetime
 
 from bcrypt import gensalt, hashpw
-from fastapi import UploadFile, Depends, HTTPException, Path
+from fastapi import UploadFile, HTTPException, Path
 from sqlalchemy.exc import IntegrityError
 
-import loggers
+from core.services.metaclasses import ServiceMeta
 from core.services.services import Service, DeleteUpdateMixin
 from market.repositories import (
     CategoryRepository, ImageRepository, ProductRepository, UserRepository, OrderRepository
@@ -19,19 +19,13 @@ from market.schemas import (
 class CategoryService(Service):
     creating_schema = CreatingCategory
     response_schema = Category
-
-    def __init__(self, repository=Depends(CategoryRepository)):
-        self.repository = repository
-        super().__init__(repository)
+    repository = CategoryRepository
 
 
 class ProductService(Service):
     creating_schema = CreatingProduct
     response_schema = Product
-
-    def __init__(self, repository=Depends(ProductRepository)):
-        self.repository = repository
-        super().__init__(repository)
+    repository = ProductRepository
 
     async def retrieve_list(
             self, name: str | None, price: str | None, category_id: int | None
@@ -86,10 +80,7 @@ class ProductService(Service):
 class ImageService(Service):
     creating_schema = CreatingImage
     response_schema = Image
-
-    def __init__(self, repository=Depends(ImageRepository)):
-        self.repository = repository
-        super().__init__(repository)
+    repository = ImageRepository
 
     async def create_image(self, file: UploadFile, product_id: int) -> None:
         url = await ImageFileUploader(file, str(product_id)).upload()
@@ -108,11 +99,8 @@ class ImageService(Service):
 class UserService(Service):
     creating_schema = CreatingUser
     response_schema = User
+    repository = UserRepository
     updatable_fields = ['username']
-
-    def __init__(self, repository=Depends(UserRepository)):
-        self.repository = repository
-        super().__init__(repository)
 
     async def registrate(self, user: CreatingUser) -> None:
         user = {'username': user.username,
@@ -120,16 +108,17 @@ class UserService(Service):
                 'password': hashpw(user.password.encode(), gensalt()).decode(),
                 'is_admin': False,
                 'date_registration': datetime.utcnow()}
-        return await self.repository.create(user)
+        try:
+            return await self.repository.create(user)
+        except IntegrityError:
+            raise HTTPException(422, 'The username or the number already registered')
 
 
-class OrderService(DeleteUpdateMixin):
+class OrderService(DeleteUpdateMixin, metaclass=ServiceMeta):
     creating_schema = CreatingUser
     response_schema = User
+    repository = OrderRepository
     updatable_fields = []
-
-    def __init__(self, repository=Depends(OrderRepository)):
-        self.repository = repository
 
     async def create(self, instance: CreatingOrder) -> None:
         products = await self.repository.get_products(instance.products)
