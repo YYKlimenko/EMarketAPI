@@ -1,7 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.engine import Row
 
-import loggers
 from core.repositories.repositories import SQLAsyncRepository
 from market.models import ProductModel, OrderModel, CategoryModel, ImageModel, UserModel
 
@@ -64,7 +63,6 @@ class ProductRepository(SQLAsyncRepository):
 
             for kwarg in ('name', 'category_id', 'price'):
                 if kwargs.get(kwarg) is not None:
-                    loggers.logger.debug(kwargs[kwarg])
                     word = 'WHERE' if count_kwargs == 0 else 'AND'
 
                     if kwarg == 'name':
