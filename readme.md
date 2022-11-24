@@ -1,4 +1,4 @@
-### API with for an online market 
+### Online market API based by FastAPI (full async) 
 
 Python 3.10  <br>
 FastAPI + SQLAlchemy<br>
