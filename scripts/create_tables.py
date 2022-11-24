@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 
-from core.settings import URL_DB
+from settings import URL_DB
 from market.models import (  # noqa: F401
     CategoryModel, ProductModel, UserModel, OrderModel,
     ProductOrderLink, ImageModel, TableModel

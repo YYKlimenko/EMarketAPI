@@ -5,7 +5,6 @@ from pydantic import BaseModel
 from sqlalchemy.engine import Row
 from sqlalchemy.exc import IntegrityError
 
-import loggers
 from core.repositories.interfaces import CRUDRepositoryInterface
 from core.services.dataclasses import SignValue
 from core.services.metaclasses import ServiceMeta
@@ -14,7 +13,6 @@ from market.models import TableModel as Model
 
 class DeleteUpdateMixin:
     async def update(self, data: dict[str, Any], _id: int = Path(alias='id')) -> None:
-        loggers.logger.debug(self.updatable_fields)
         for key in data:
             if key not in self.updatable_fields:
                 raise HTTPException(422)
@@ -29,6 +27,7 @@ class Service(DeleteUpdateMixin, metaclass=ServiceMeta):
     response_schema: Model | None = BaseModel
     filters: dict[str, Any] = dict()
     repository = CRUDRepositoryInterface
+    updatable_fields = None
 
     async def create(self, instance: BaseModel):
         try:

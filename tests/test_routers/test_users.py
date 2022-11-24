@@ -1,7 +1,3 @@
-from market.models import (  # noqa: F401
-    CategoryModel, ProductModel, UserModel, OrderModel,
-    ProductOrderLink, ImageModel, TableModel
-)
 from tests.client import client
 from tests.fixtures import get_admin_header, get_user_header, set_test_environment  # noqa: F401
 
@@ -98,7 +94,7 @@ def test_get_nonexistent_user(get_admin_header, set_test_environment):  # noqa: 
 
 def test_post_user(get_admin_header, set_test_environment):  # noqa: F811
     response = client.post(
-        'users/registration/',
+        '/users/registration/',
         json={
             'username': 'user_3',
             'password': 'password',
@@ -125,7 +121,7 @@ def test_post_user(get_admin_header, set_test_environment):  # noqa: F811
 
 def test_post_user_with_invalid_data(get_admin_header, set_test_environment):  # noqa: F811
     response = client.post(
-        'users/registration/',
+        '/users/registration/',
         json={
             'username': 'user_3',
             'password': 'password',
@@ -141,10 +137,8 @@ def test_post_user_with_invalid_data(get_admin_header, set_test_environment):  #
 
 def test_put_user_by_admin(get_admin_header, set_test_environment):  # noqa: F811
     response = client.put(
-        'users/3/',
-        json={
-            'username': 'user_3_updated',
-        },
+        '/users/3/',
+        json={'username': 'user_3_updated'},
         headers={'Authorization': get_admin_header}
     )
     assert response.status_code == 202
@@ -166,10 +160,8 @@ def test_put_user_by_admin(get_admin_header, set_test_environment):  # noqa: F81
 
 def test_put_user_by_another_user(get_user_header, set_test_environment):  # noqa: F811
     response = client.put(
-        'users/3/',
-        json={
-            'username': 'user_3_updated_again',
-        },
+        '/users/3/',
+        json={'username': 'user_3_updated_again'},
         headers={'Authorization': get_user_header}
     )
     assert response.status_code == 401
@@ -177,10 +169,8 @@ def test_put_user_by_another_user(get_user_header, set_test_environment):  # noq
 
 def test_put_user_by_user(get_user_header, set_test_environment):  # noqa: F811
     response = client.put(
-        'users/2/',
-        json={
-            'username': 'user_2_updated',
-        },
+        '/users/2/',
+        json={'username': 'user_2_updated'},
         headers={'Authorization': get_user_header}
     )
     assert response.status_code == 202
@@ -202,10 +192,8 @@ def test_put_user_by_user(get_user_header, set_test_environment):  # noqa: F811
 
 def test_put_user_with_invalid_data(get_admin_header, set_test_environment):  # noqa: F811
     response = client.put(
-        'users/3/',
-        json={
-            'number': '88000965599',
-        },
+        '/users/3/',
+        json={'number': '88000965599'},
         headers={'Authorization': get_admin_header}
     )
     assert response.status_code == 422
@@ -215,7 +203,7 @@ def test_put_user_with_invalid_data(get_admin_header, set_test_environment):  # 
 
 
 def test_delete_user_by_admin(get_admin_header, set_test_environment):  # noqa: F811
-    response = client.delete('users/3/', headers={'Authorization': get_admin_header})
+    response = client.delete('/users/3/', headers={'Authorization': get_admin_header})
     assert response.status_code == 202
     assert response.json() is None
 
@@ -236,3 +224,6 @@ def test_delete_user_by_user(get_user_header, set_test_environment):  # noqa: F8
     assert response.json() is None
 
 
+def test_delete_user_by_another_user(get_user_header, set_test_environment):  # noqa: F811
+    response = client.delete('/users/1/', headers={'Authorization': get_user_header})
+    assert response.status_code == 401

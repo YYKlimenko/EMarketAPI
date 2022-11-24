@@ -6,10 +6,11 @@ from sqlalchemy.exc import IntegrityError
 
 from core.services.metaclasses import ServiceMeta
 from core.services.services import Service, DeleteUpdateMixin
+from market.dataclasses import SignPrice
 from market.repositories import (
     CategoryRepository, ImageRepository, ProductRepository, UserRepository, OrderRepository
 )
-from market.utils.image_edit import ImageFileUploader, ImageFileDeleter
+from market.utils.image_edit import ImageEditor
 from market.schemas import (
     CreatingCategory, CreatingProduct, CreatingOrder, CreatingUser, Order, Product, Category,
     Image, CreatingImage, User
@@ -28,11 +29,11 @@ class ProductService(Service):
     repository = ProductRepository
 
     async def retrieve_list(
-            self, name: str | None, price: str | None, category_id: int | None
+            self, name: str | None, price: SignPrice | None, category_id: int | None
     ) -> list[Product]:
-
+        price = (price.sign, price.value) if price.sign and price.value else None
         raw_products = await self.repository.retrieve_with_images(
-            many=True, name=name, price=(price.sign, price.value), category_id=category_id
+            many=True, name=name, price=price, category_id=category_id
         )
 
         products = {}
@@ -82,17 +83,19 @@ class ImageService(Service):
     response_schema = Image
     repository = ImageRepository
 
-    async def create_image(self, file: UploadFile, product_id: int) -> None:
-        url = await ImageFileUploader(file, str(product_id)).upload()
+    async def create_image(
+            self, file: UploadFile, product_id: int, image_editor: ImageEditor
+    ) -> None:
+        url = await image_editor.upload(file, str(product_id))
         image = {'url': url, 'product_id': product_id}
         try:
             await self.repository.create(image)
         except IntegrityError:
-            await ImageFileDeleter('media', url).delete()
+            await image_editor.delete(url)
 
-    async def delete_image(self, image_id: int) -> None:
+    async def delete_image(self, image_id: int, image_editor: ImageEditor) -> None:
         if image := await self.retrieve_by_id(image_id):
-            await ImageFileDeleter('media', image.url).delete()
+            await image_editor.delete(image.url)
             return await self.delete(image_id)
 
 
@@ -114,7 +117,7 @@ class UserService(Service):
             raise HTTPException(422, 'The username or the number already registered')
 
 
-class OrderService(DeleteUpdateMixin, metaclass=ServiceMeta):
+class OrderService(Service):
     creating_schema = CreatingUser
     response_schema = User
     repository = OrderRepository
@@ -131,7 +134,7 @@ class OrderService(DeleteUpdateMixin, metaclass=ServiceMeta):
 
     async def retrieve_by_id(
             self, _id: int = Path(alias='id')
-    ) -> Order:
+    ) -> Order | None:
         order_product = await self.repository.retrieve_with_products(_id=_id)
         order = None
         products = {}
@@ -153,7 +156,8 @@ class OrderService(DeleteUpdateMixin, metaclass=ServiceMeta):
             if row.image_id:
                 products[row.product_id].images.append({'id': row.image_id, 'url': row.url})
 
-        order.products = products
+        if order:
+            order.products = list(products.values())
         return order
 
     async def retrieve_list(

@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from core.settings import LOGIN_DB, PASSWORD_DB
+from settings import LOGIN_DB, PASSWORD_DB
 from market.configs.Config import Config
 
 

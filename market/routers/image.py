@@ -3,6 +3,7 @@ from sqlalchemy.engine import Row
 
 from market.objects import PERMIT_FOR_ADMIN
 from market.services import ImageService
+from market.utils.image_edit import ImageEditor
 
 router = APIRouter(tags=['Images'])
 
@@ -17,7 +18,7 @@ async def get_images(product_id: int | None = None, service: ImageService = Depe
 
 
 @router.get(
-    '/images/{id}',
+    '/images/{id}/',
     status_code=200,
     description='Get the image',
 )
@@ -27,21 +28,28 @@ async def get_image(_id: int = Path(alias='id'), service: ImageService = Depends
 
 @router.post(
     '/images/',
-    status_code=202,
+    status_code=201,
     description='Create the image',
     dependencies=[PERMIT_FOR_ADMIN]
 )
 async def post_image(
-        file: UploadFile, product_id: int = Form(), service: ImageService = Depends()
+        file: UploadFile,
+        product_id: int = Form(),
+        service: ImageService = Depends(),
+        image_editor: ImageEditor = Depends()
 ) -> None:
-    return await service.create_image(file, product_id)
+    return await service.create_image(file, product_id, image_editor)
 
 
 @router.delete(
-    '/images/{id}',
+    '/images/{id}/',
     status_code=202,
     description='Delete the image',
     dependencies=[PERMIT_FOR_ADMIN]
 )
-async def delete_image(_id: int = Path(alias='id'), service: ImageService = Depends()) -> None:
-    return await service.delete(_id)
+async def delete_image(
+        _id: int = Path(alias='id'),
+        service: ImageService = Depends(),
+        image_editor: ImageEditor = Depends()
+) -> None:
+    return await service.delete_image(_id, image_editor)

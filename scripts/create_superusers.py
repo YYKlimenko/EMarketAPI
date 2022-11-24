@@ -3,7 +3,7 @@ import datetime
 
 from bcrypt import hashpw, gensalt
 
-from core.settings import session_maker
+from settings import session_maker
 from market.models import TableModel, UserModel  # noqa: F401
 
 

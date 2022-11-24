@@ -15,7 +15,7 @@ router = APIRouter(tags=['Products'])
 )
 async def get_products(
         name: str | None = None,
-        price: str | None = Depends(SignPrice),
+        price: SignPrice = Depends(),
         category_id: int | None = None,
         service: ProductService = Depends()
 ) -> list[Product]:
@@ -23,7 +23,7 @@ async def get_products(
 
 
 @router.get(
-    '/products/{id}',
+    '/products/{id}/',
     status_code=200,
     description='Get the products',
 )
@@ -42,7 +42,7 @@ async def post_product(product: CreatingProduct, service: ProductService = Depen
 
 
 @router.put(
-    '/products/{id}',
+    '/products/{id}/',
     status_code=202,
     description='Update the product',
     dependencies=[PERMIT_FOR_ADMIN]
@@ -54,7 +54,7 @@ async def put_product(
 
 
 @router.delete(
-    '/products/{id}',
+    '/products/{id}/',
     status_code=202,
     description='Delete the product',
     dependencies=[PERMIT_FOR_ADMIN]

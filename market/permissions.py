@@ -10,10 +10,10 @@ from market.schemas import CreatingOrder
 
 
 async def permit_get_order_for_owner(
-        order_id: int | None = Path(alias='_id'),
+        repository: OrderRepository = Depends(),
+        order_id: int | None = Path(alias='id'),
         auth_data: dict[str, Any] = Depends(authenticator.handle_auth)
 ):
-    repository = OrderRepository()
 
     class user_id(BaseModel):
         user_id: int

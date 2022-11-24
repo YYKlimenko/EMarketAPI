@@ -21,7 +21,7 @@ async def get_categories(
 
 
 @router.get(
-    '/categories/{id}',
+    '/categories/{id}/',
     status_code=200,
     description='Get the category',
 )
@@ -40,7 +40,7 @@ async def post_category(category: CreatingCategory, service=Depends(CategoryServ
 
 
 @router.put(
-    '/categories/{id}',
+    '/categories/{id}/',
     status_code=202,
     description='The category is updated',
     dependencies=[PERMIT_FOR_ADMIN]
@@ -52,7 +52,7 @@ async def put_category(
 
 
 @router.delete(
-    '/categories/{id}',
+    '/categories/{id}/',
     status_code=202,
     description='The category is deleted',
     dependencies=[PERMIT_FOR_ADMIN]

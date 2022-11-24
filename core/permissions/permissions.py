@@ -3,7 +3,7 @@ from typing import Any
 from fastapi import Depends, HTTPException
 
 from auth.objects import authenticator
-from core.settings import SUPERUSERS
+from settings import SUPERUSERS
 
 
 def is_admin(user_id):

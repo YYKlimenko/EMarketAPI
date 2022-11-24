@@ -15,17 +15,17 @@ router = APIRouter(tags=['Orders'])
     description='Get a list of orders',
     dependencies=[PERMIT_FOR_OWNER]
 )
-async def get_orders(service=Depends(OrderService)):
-    return await service.retrieve_list()
+async def get_orders(service: OrderService = Depends(), user_id: int | None = None):
+    return await service.retrieve_list(user_id)
 
 
 @router.get(
-    '/order/{id}',
+    '/orders/{id}/',
     status_code=200,
     description='Get the order',
     dependencies=[PERMIT_GET_ORDER_FOR_OWNER]
 )
-async def get_order(_id: int = Path(alias='id'), service=Depends(OrderService)) -> Order:
+async def get_order(_id: int = Path(alias='id'), service: OrderService = Depends()) -> Order:
     return await service.retrieve_by_id(_id)
 
 
@@ -35,25 +35,15 @@ async def get_order(_id: int = Path(alias='id'), service=Depends(OrderService)) 
     description='Create the order',
     dependencies=[PERMIT_POST_ORDER_FOR_OWNER]
 )
-async def post_order(instance: CreatingOrder, service=Depends(OrderService)) -> None:
+async def post_order(instance: CreatingOrder, service: OrderService = Depends()) -> None:
     return await service.create(instance)
 
 
-@router.put(
-    '/orders/{id}',
-    status_code=202,
-    description='Update the order',
-    dependencies=[PERMIT_FOR_ADMIN]
-)
-async def put_order(data: dict, _id: int = Path(alias='id'), service=Depends(OrderService)) -> None:
-    return await service.put(data, _id)
-
-
 @router.delete(
-    '/orders/{id}',
+    '/orders/{id}/',
     status_code=202,
     description='Delete the order',
     dependencies=[PERMIT_GET_ORDER_FOR_OWNER]
 )
-async def delete_order(_id: int = Path(alias="id"), service=Depends(OrderService)) -> None:
+async def delete_order(_id: int = Path(alias="id"), service: OrderService = Depends()) -> None:
     return await service.delete(_id)
