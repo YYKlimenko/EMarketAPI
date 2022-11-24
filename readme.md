@@ -2,7 +2,7 @@
 
 Python 3.10  <br>
 FastAPI + SQLAlchemy<br>
-<i>Other dependencies: look requirements.txt</i>
+<i>Other dependencies: look in requirements.txt</i>
 
 It's implemented in the project: <br>
 - Total async work with Database and API at all; <br>
