@@ -17,12 +17,12 @@ def test_get_users_by_admin(get_admin_header, set_test_environment):  # noqa: F8
     assert response == [
         {'id': 1,
          'username': 'admin',
-         'number': '89006772323',
+         'number': '88888888888',
          'is_admin': True
          },
         {'id': 2,
          'username': 'user',
-         'number': '89006005588',
+         'number': '99999999999',
          'is_admin': False
          }
     ]
@@ -38,7 +38,7 @@ def test_get_admin_by_admin(get_admin_header, set_test_environment):  # noqa: F8
     assert response == {
         'id': 1,
         'username': 'admin',
-        'number': '89006772323',
+        'number': '88888888888',
         'is_admin': True
     }
 
@@ -53,7 +53,7 @@ def test_get_user_by_admin(get_admin_header, set_test_environment):  # noqa: F81
     assert response == {
         'id': 2,
         'username': 'user',
-        'number': '89006005588',
+        'number': '99999999999',
         'is_admin': False
     }
 
@@ -73,7 +73,7 @@ def test_get_user_by_user(get_user_header, set_test_environment):  # noqa: F811
     assert response == {
         'id': 2,
         'username': 'user',
-        'number': '89006005588',
+        'number': '99999999999',
         'is_admin': False
     }
 
@@ -99,7 +99,7 @@ def test_post_user(get_admin_header, set_test_environment):  # noqa: F811
             'username': 'user_3',
             'password': 'password',
             'password2': 'password',
-            'number': '89006772354'
+            'number': '88888888889'
         }
     )
     assert response.status_code == 201
@@ -114,7 +114,7 @@ def test_post_user(get_admin_header, set_test_environment):  # noqa: F811
     assert response == {
         'id': 3,
         'username': 'user_3',
-        'number': '89006772354',
+        'number': '88888888889',
         'is_admin': False
     }
 
@@ -126,7 +126,7 @@ def test_post_user_with_invalid_data(get_admin_header, set_test_environment):  #
             'username': 'user_3',
             'password': 'password',
             'password2': 'password',
-            'number': '8900677235478'
+            'number': '88888888888'
         }
     )
     assert response.status_code == 422
@@ -153,7 +153,7 @@ def test_put_user_by_admin(get_admin_header, set_test_environment):  # noqa: F81
     assert response == {
         'id': 3,
         'username': 'user_3_updated',
-        'number': '89006772354',
+        'number': '88888888889',
         'is_admin': False
     }
 
@@ -185,7 +185,7 @@ def test_put_user_by_user(get_user_header, set_test_environment):  # noqa: F811
     assert response == {
         'id': 2,
         'username': 'user_2_updated',
-        'number': '89006005588',
+        'number': '99999999999',
         'is_admin': False
     }
 
@@ -193,7 +193,7 @@ def test_put_user_by_user(get_user_header, set_test_environment):  # noqa: F811
 def test_put_user_with_invalid_data(get_admin_header, set_test_environment):  # noqa: F811
     response = client.put(
         '/users/3/',
-        json={'number': '88000965599'},
+        json={'number': '99999999999'},
         headers={'Authorization': get_admin_header}
     )
     assert response.status_code == 422

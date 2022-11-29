@@ -14,13 +14,13 @@ def create_test_data(engine):
         instances = [
             UserModel(
                 username='admin',
-                number='89006772323',
+                number='88888888888',
                 password=hashpw('admin'.encode(), gensalt()).decode(),
                 date_registration=datetime.utcnow(),
                 is_admin=True),
             UserModel(
                 username='user',
-                number='89006005588',
+                number='99999999999',
                 password=hashpw('user'.encode(), gensalt()).decode(),
                 date_registration=datetime.utcnow(),
                 is_admin=False
