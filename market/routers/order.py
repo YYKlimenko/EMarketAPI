@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Path
 
 from market.schemas import Order, CreatingOrder
 from market.objects import (
-    PERMIT_FOR_OWNER, PERMIT_POST_ORDER_FOR_OWNER, PERMIT_FOR_ADMIN, PERMIT_GET_ORDER_FOR_OWNER
+    PERMIT_FOR_OWNER, PERMIT_POST_ORDER_FOR_OWNER, PERMIT_GET_ORDER_FOR_OWNER
 )
 from market.services import OrderService
 

@@ -4,8 +4,7 @@ from bcrypt import gensalt, hashpw
 from fastapi import UploadFile, HTTPException, Path
 from sqlalchemy.exc import IntegrityError
 
-from core.services.metaclasses import ServiceMeta
-from core.services.services import Service, DeleteUpdateMixin
+from core.services.services import Service
 from market.dataclasses import SignPrice
 from market.repositories import (
     CategoryRepository, ImageRepository, ProductRepository, UserRepository, OrderRepository
