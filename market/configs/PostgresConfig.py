@@ -8,8 +8,8 @@ from market.configs.Config import Config
 class PostgresConfig(Config):
     DIALECT_DB = 'postgresql'
     DRIVER_DB = 'asyncpg'
-    URL_DB = f'{LOGIN_DB}:{PASSWORD_DB}@localhost:5432/market'
-    URL_TEST_DB = f'{LOGIN_DB}:{PASSWORD_DB}@localhost:5432/test_market'
+    URL_DB = f'{LOGIN_DB}:{PASSWORD_DB}@db:5432/market'
+    URL_TEST_DB = f'{LOGIN_DB}:{PASSWORD_DB}@db:5432/test_market'
 
     def get_engine(self):
         return create_async_engine(

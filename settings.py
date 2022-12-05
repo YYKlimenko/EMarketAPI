@@ -21,8 +21,8 @@ else:
 
 DIALECT_DB = 'postgresql'
 DRIVER_DB = 'asyncpg'
-URL_DB = f'{LOGIN_DB}:{PASSWORD_DB}@localhost:5432/market'
-URL_TEST_DB = f'{LOGIN_DB}:{PASSWORD_DB}@localhost:5432/test_market'
+URL_DB = f'{LOGIN_DB}:{PASSWORD_DB}@db:5432/market'
+URL_TEST_DB = f'{LOGIN_DB}:{PASSWORD_DB}@db:5432/test_market'
 
 engine = create_async_engine(
     f'{DIALECT_DB}+{DRIVER_DB}://{URL_DB}', future=True, echo=True

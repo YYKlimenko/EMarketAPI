@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import declarative_base
 
@@ -19,7 +19,10 @@ class SQLAuthorizationRepository:
     ) -> dict[str, str | int]:
         async with self.session_maker() as session:
             query = select(getattr(self.model, 'id'), getattr(self.model, password_field))
-            data = (await session.execute(
-                query.where(getattr(self.model, field) == value))
-                    ).all()[0]
-            return {'id': data[0], 'password': data[1]}
+            try:
+                data = (await session.execute(
+                    query.where(getattr(self.model, field) == value))
+                        ).all()[0]
+                return {'id': data[0], 'password': data[1]}
+            except IndexError:
+                raise HTTPException(422, 'The User is not exists')
