@@ -3,12 +3,13 @@ import datetime
 
 from bcrypt import hashpw, gensalt
 
-from settings import session_maker
+from market.configs import PostgresConfig
 from market.models import TableModel, UserModel  # noqa: F401
 
 
-async def create_superuser(session):
-    session = session()
+async def create_superuser(Config):
+    session_maker = Config().get_session_maker()
+    session = session_maker()
     user = UserModel(
         username='admin',
         number='89006772323',
@@ -21,4 +22,4 @@ async def create_superuser(session):
 
 
 if __name__ == '__main__':
-    asyncio.run(create_superuser(session_maker))
+    asyncio.run(create_superuser(PostgresConfig))

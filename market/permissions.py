@@ -3,7 +3,7 @@ from typing import Any
 from fastapi import Depends, HTTPException, Path
 from pydantic import BaseModel
 
-from auth.objects import authenticator
+from auth.service import Authenticator
 from core.permissions.permissions import permit_for_owner, is_admin
 from market.repositories import OrderRepository
 from market.schemas import CreatingOrder
@@ -12,7 +12,7 @@ from market.schemas import CreatingOrder
 async def permit_get_order_for_owner(
         repository: OrderRepository = Depends(),
         order_id: int | None = Path(alias='id'),
-        auth_data: dict[str, Any] = Depends(authenticator.handle_auth)
+        auth_data: dict[str, Any] = Depends(Authenticator.handle_auth)
 ):
 
     class user_id(BaseModel):
@@ -25,7 +25,7 @@ async def permit_get_order_for_owner(
 
 def permit_post_order_for_owner(
         instance: CreatingOrder,
-        auth_data: dict[str, Any] = Depends(authenticator.handle_auth)
+        auth_data: dict[str, Any] = Depends(Authenticator.handle_auth)
 ) -> bool:
     if is_admin(auth_data['sub']) or instance.user_id == auth_data['sub']:
         return True
@@ -34,6 +34,6 @@ def permit_post_order_for_owner(
 
 def permit_for_user(
         user_id: int = Path(alias='id'),
-        auth_data: dict[str, Any] = Depends(authenticator.handle_auth)
+        auth_data: dict[str, Any] = Depends(Authenticator.handle_auth)
 ):
     return permit_for_owner(user_id, auth_data)

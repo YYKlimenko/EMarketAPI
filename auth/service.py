@@ -7,14 +7,15 @@ from fastapi import Body, HTTPException, Security, Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from auth.repositories import SQLAuthorizationRepository
-from auth.settings import SECRET_KEY
+from auth.configs import AuthConfig
 
 
 class AuthorizationService:
-    hash_key = SECRET_KEY
 
-    def __init__(self, repository=Depends(SQLAuthorizationRepository)):
+    def __init__(self, repository=Depends(SQLAuthorizationRepository), config=Depends(AuthConfig)):
         self.repository = repository
+        self.hash_key = config.SECRET_KEY
+        self.user_model = config.USER_MODEL
 
     def encode_jwt(self, user_id: int):
         payload = {
@@ -29,7 +30,7 @@ class AuthorizationService:
             login: str = Body(...),
             password: str = Body(...),
     ) -> dict[str, str]:
-        user = await self.repository.get_auth_data('username', login)
+        user = await self.repository.get_auth_data('username', login, self.user_model)
         if user and checkpw(password.encode(), user['password'].encode()):
             return {"access_token": self.encode_jwt(user['id']), "token_type": "bearer"}
         else:
@@ -37,19 +38,19 @@ class AuthorizationService:
 
 
 class Authenticator:
-    def __init__(self, key: str) -> None:
-        self._key = key
 
-    def decode_jwt(self, token: str) -> dict[str, Any]:
+    @staticmethod
+    def decode_jwt(token: str, hash_key: str) -> dict[str, Any]:
         try:
-            payload = jwt.decode(token, self._key, algorithms=['HS256'])
+            payload = jwt.decode(token, hash_key, algorithms=['HS256'])
             return payload
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=401, detail='Expired')
         except jwt.InvalidTokenError:
             raise HTTPException(status_code=401, detail='Invalid token')
 
+    @staticmethod
     def handle_auth(
-            self, auth: HTTPAuthorizationCredentials = Security(HTTPBearer())
+            auth: HTTPAuthorizationCredentials = Security(HTTPBearer()), config=Depends(AuthConfig)
     ) -> dict[str, Any]:
-        return self.decode_jwt(auth.credentials)
+        return Authenticator.decode_jwt(auth.credentials, config.SECRET_KEY)
