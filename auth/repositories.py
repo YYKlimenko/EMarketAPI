@@ -16,11 +16,11 @@ class SQLAuthorizationRepository:
             self, field: str, value: Any, model: sql_model(), password_field: str = 'password'
     ) -> dict[str, str | int]:
         async with self.session_maker() as session:
-            query = select(getattr(model, 'id'), getattr(model, password_field))
+            query = select(getattr(model, 'id'), getattr(model, password_field), model.is_admin)
             try:
                 data = (await session.execute(
                     query.where(getattr(model, field) == value))
                         ).all()[0]
-                return {'id': data[0], 'password': data[1]}
+                return {'id': data[0], 'password': data[1], 'is_admin': data[2]}
             except IndexError:
                 raise HTTPException(422, 'The User is not exists')

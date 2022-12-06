@@ -17,11 +17,12 @@ class AuthorizationService:
         self.hash_key = config.SECRET_KEY
         self.user_model = config.USER_MODEL
 
-    def encode_jwt(self, user_id: int):
+    def encode_jwt(self, user_id: int, is_admin: bool):
         payload = {
             'exp': datetime.utcnow() + timedelta(hours=12),
             'iat': datetime.utcnow(),
-            'sub': user_id
+            'sub': user_id,
+            'is_admin': is_admin
         }
         return jwt.encode(payload, self.hash_key, algorithm='HS256')
 
@@ -32,7 +33,10 @@ class AuthorizationService:
     ) -> dict[str, str]:
         user = await self.repository.get_auth_data('username', login, self.user_model)
         if user and checkpw(password.encode(), user['password'].encode()):
-            return {"access_token": self.encode_jwt(user['id']), "token_type": "bearer"}
+            return {
+                "access_token": self.encode_jwt(user['id'], user['is_admin']),
+                "token_type": "bearer"
+            }
         else:
             raise HTTPException(401, detail='Not authorized')
 

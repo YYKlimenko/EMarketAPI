@@ -4,7 +4,7 @@ from fastapi import Depends, HTTPException, Path
 from pydantic import BaseModel
 
 from auth.service import Authenticator
-from core.permissions.permissions import permit_for_owner, is_admin
+from core.permissions.permissions import permit_for_owner
 from market.repositories import OrderRepository
 from market.schemas import CreatingOrder
 
@@ -27,7 +27,7 @@ def permit_post_order_for_owner(
         instance: CreatingOrder,
         auth_data: dict[str, Any] = Depends(Authenticator.handle_auth)
 ) -> bool:
-    if is_admin(auth_data['sub']) or instance.user_id == auth_data['sub']:
+    if auth_data['is_admin'] or instance.user_id == auth_data['sub']:
         return True
     raise HTTPException(401, 'You\'re don\'t have permission')
 
