@@ -1,17 +1,27 @@
-### Online market API based by FastAPI (full async) 
+### Total async e-market API 
 
-Python 3.10  <br>
-FastAPI + SQLAlchemy<br>
-<i>Other dependencies: look in requirements.txt</i>
+#### By: </b><br>
+Python 3.10 <br>
+FastAPI, SQLAlchemy <br>
+Other dependencies: look in requirements.txt <br>
 
-It's implemented in the project: <br>
-- Total async work with Database and API at all; <br>
-- The async repositories layer for work with Database; <br>
-- JWT auth at the separated layer; <br>
-- Docker container<br>
+#### It implemented in the project:
 
-<i> Tested with postgresql </i>
+CRUD operations <br>
+Async work with SQL DB <br>
+Service, Repository layers <br>
+JWT authentication <br>
+Tests by pytest <br>
+Dockerfile, docker-compose.yml <br>
 
+##### Tested with PostgreSQL
 
+### How to run it?
 
-###### <i> PS: I'm sorry for my English. but I hope for your understanding!)
+Install Docker, Docker-compose; <br>
+Clone repository or download repository files; <br>
+Run command from the project directory: <br>
+docker-compose up <br>
+Notice: ports 8000 & 5432 should be free (or set other ports in docker-compose.yml) <br>
+Open API Documentation at localhost:8000/docs <br>
+Follow to the API Documentation <br>
