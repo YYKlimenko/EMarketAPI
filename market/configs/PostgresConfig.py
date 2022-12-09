@@ -18,8 +18,13 @@ class PostgresConfig(Config):
 
     def get_engine(self):
         return create_async_engine(
-            f'{self.DIALECT_DB}+{self.DRIVER_DB}://{self.URL_DB}', future=True, echo=True
+            f'{self.DIALECT_DB}+{self.DRIVER_DB}://{self.get_url_db()}', future=True, echo=True
         )
 
     def get_session_maker(self):
         return sessionmaker(self.get_engine(), expire_on_commit=False, class_=AsyncSession)
+
+    @staticmethod
+    def get_url_db():
+        self = PostgresConfig
+        return f'{self.LOGIN_DB}:{self.PASSWORD_DB}@{self.HOST_DB}:{self.PORT_DB}/{self.DB_NAME}'

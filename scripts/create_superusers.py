@@ -7,8 +7,8 @@ from market.configs import PostgresConfig
 from market.models import TableModel, UserModel  # noqa: F401
 
 
-async def create_superuser(Config):
-    session_maker = Config().get_session_maker()
+async def create_superuser(config):
+    session_maker = config.get_session_maker()
     session = session_maker()
     user = UserModel(
         username='admin',
@@ -22,4 +22,4 @@ async def create_superuser(Config):
 
 
 if __name__ == '__main__':
-    asyncio.run(create_superuser(PostgresConfig))
+    asyncio.run(create_superuser(PostgresConfig()))

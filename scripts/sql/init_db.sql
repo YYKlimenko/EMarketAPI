@@ -1,0 +1,2 @@
+CREATE DATABASE market;
+CREATE DATABASE test_market;
