@@ -7,7 +7,7 @@ ENV PASSWORD_DB 'YuraMarketPassword___1984'
 ENV SECRET_KEY  'KYKOYAKO'
 
 WORKDIR /backend
-COPY ./requirements.txt /backend/
+COPY ../requirements.txt /backend/
 RUN pip install -r /backend/requirements.txt
 
-COPY . /backend
+COPY .. /backend

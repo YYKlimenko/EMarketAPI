@@ -2,17 +2,17 @@ version: '3.7'
 services:
 
   backend:
-    build: .
+    build: ..
     image: app
     ports:
-      - "8000:8000"
+      - '8000:8000'
     environment:
       PYTHONDONTWRITEBYTECODE: 1
       PYTHONUNBUFFERED: 1
-      LOGIN_DB: "postgres"
-      PASSWORD_DB: "YuraMarketPassword___1984"
-      SECRET_KEY:  "KYKOYAKO"
-    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+      LOGIN_DB: 'postgres'
+      PASSWORD_DB: 'YuraMarketPassword___1984'
+      SECRET_KEY:  'KYKOYAKO'
+    entrypoint: ['uvicorn', 'main:app', '--host', '0.0.0.0', '--port', '8000']
     links:
       - db
     depends_on:
