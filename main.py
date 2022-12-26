@@ -7,12 +7,12 @@ from auth.router import router as auth_router
 from core import setup
 from loggs.config import LOGGING_CONFIG
 from market.routers import category, product, image, user, order
-from middlewares import handle_unknown_exception
+from core.middlewares import handle_unknown_exception
 
 app = FastAPI()
 for router in (
         auth_router, category.router, product.router,
-        image.router, user.router,  order.router, setup.router
+        image.router, user.router, order.router, setup.router
 ):
     app.include_router(router)
 
