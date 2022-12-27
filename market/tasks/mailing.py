@@ -1,9 +1,9 @@
 from time import sleep
 
-from market.tasks.config import app
+from market.tasks.config import celery
 
 
-@app.task
+@celery.task
 def hello():
     # sleep(100000)
     return '1'
