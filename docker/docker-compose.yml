@@ -2,7 +2,7 @@ version: '3.7'
 services:
 
   backend:
-    build: ..
+    build: .
     image: app
     ports:
       - '8000:8000'
