@@ -4,7 +4,7 @@ services:
   backend:
     build:
       context: ..
-      dockerfile: ./docker/Dockerfile
+      dockerfile: ./docker/DockerfileBackend
     image: app
     ports:
       - '8000:8000'
@@ -21,14 +21,16 @@ services:
       - db
 
   db:
-      image: postgres:13.3
+      build:
+        context: .
+        dockerfile: DockerfileDB
+      image: postgres
       ports:
         - "5432:5432"
       environment:
         POSTGRES_PASSWORD: "YuraMarketPassword___1984"
       volumes:
          - data:/var/lib/postgresql/data
-         - ./sql/:/docker-entrypoint-initdb.d
 
 volumes:
   data:
