@@ -9,7 +9,7 @@ pipeline {
             }
         }
 
-         stage("Test") {
+         stage("Test backend") {
             steps {
                 sh "docker exec -i docker_backend_1 sh -c 'python -m pytest .'"
             }
