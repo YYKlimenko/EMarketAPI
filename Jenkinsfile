@@ -17,7 +17,6 @@ pipeline {
 
         stage("Merge in master branch") {
             steps {
-                sh "git pull --ff-only https://github.com/YYKlimenko/EMarketAPI.git master"
                 sh """git checkout master && git merge test && git push https://${GIT_TOKEN}@github.com/YYKlimenko/EMarketAPI.git"""
             }
         }
