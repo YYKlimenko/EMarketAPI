@@ -19,7 +19,7 @@ pipeline {
             steps {
                 sh "cat Jenkinsfile"
                 sh "git checkout master"
-                sh "git pull https//github.com/YYKlimenko/EMarketAPI.git"
+                sh "git pull --ff-only https//github.com/YYKlimenko/EMarketAPI.git"
                 sh "cat Jenkinsfile"
                 sh "git merge test"
                 sh "cat Jenkinsfile"
