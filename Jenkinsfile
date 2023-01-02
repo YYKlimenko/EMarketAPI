@@ -14,5 +14,11 @@ pipeline {
                 sh "docker exec -i docker_backend_1 sh -c 'python -m pytest .'"
             }
         }
+
+        stage('Merge in master branch') {
+            steps {
+                sh """git checkout master && git merge test && git push https://${GIT_TOKEN}@github.com/YYKlimenko/EMarketAPI.git"""
+            }
+        }
     }
 }
