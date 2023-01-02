@@ -2,9 +2,16 @@ pipeline {
     agent any
 
     stages {
-        stage('LS') {
+
+        stage('Up docker-compose file') {
             steps {
-                sh 'ls'
+                sh 'cd docker && docker-compose up --build -d'
+            }
+        }
+
+         stage('Test') {
+            steps {
+                sh "docker exec -i docker_backend_1 sh -c 'python -m pytest .'"
             }
         }
     }
