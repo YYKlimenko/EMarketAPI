@@ -20,6 +20,8 @@ pipeline {
                 sh "cat Jenkinsfile"
                 sh "git checkout master"
                 sh "cat Jenkinsfile"
+                sh "git merge test"
+                sh "cat Jenkinsfile"
                 sh """git checkout master && git merge test && git push https://${GIT_TOKEN}@github.com/YYKlimenko/EMarketAPI.git"""
             }
         }
