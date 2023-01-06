@@ -17,11 +17,9 @@ pipeline {
 
         stage("Merge in master branch") {
             steps {
+                sh "git log --oneline"
                 sh "cat Jenkinsfile"
-                sh "git branch"
-                sh "git pull --ff-only https://github.com/YYKlimenko/EMarketAPI.git test"
-                sh "git checkout master"
-                sh "git pull --ff-only https://github.com/YYKlimenko/EMarketAPI.git master"
+
                 sh "git merge test"
                 sh """git push https://${GIT_TOKEN}@github.com/YYKlimenko/EMarketAPI.git"""
             }
