@@ -17,12 +17,10 @@ pipeline {
 
         stage("Merge in master branch") {
             steps {
-                sh "git log --oneline"
-                sh "git branch -v"
-
+                sh 'git clone https://YYKlimenko/EMarketAPI.git'
+                sh 'git checkout test'
                 sh "git checkout master"
                 sh "git merge test"
-
                 sh """git push https://${GIT_TOKEN}@github.com/YYKlimenko/EMarketAPI.git"""
             }
         }
