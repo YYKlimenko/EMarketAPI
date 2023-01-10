@@ -7,7 +7,7 @@ services:
       dockerfile: ./docker/DockerfileBackend
     image: app
     ports:
-      - '8000:8000'
+      - '8080:8080'
     environment:
       PYTHONDONTWRITEBYTECODE: 1
       PYTHONUNBUFFERED: 1
