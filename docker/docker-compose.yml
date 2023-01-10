@@ -14,7 +14,7 @@ services:
       LOGIN_DB: 'postgres'
       PASSWORD_DB: 'YuraMarketPassword___1984'
       SECRET_KEY:  'KYKOYAKO'
-    entrypoint: ['uvicorn', 'main:app', '--host', '0.0.0.0', '--port', '8000']
+    entrypoint: ['uvicorn', 'main:app', '--host', '0.0.0.0', '--port', '8080']
     links:
       - db
     depends_on:
