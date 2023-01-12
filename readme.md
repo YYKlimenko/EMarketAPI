@@ -5,7 +5,7 @@ Python 3.10 <br>
 FastAPI, SQLAlchemy <br>
 Other dependencies: look in requirements.txt <br>
 
-#### It implemented in the project:
+#### It was implemented in the project:
 
 CRUD operations <br>
 Async work with SQL DB <br>
