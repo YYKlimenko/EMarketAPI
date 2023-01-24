@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 from fastapi import Depends
@@ -8,13 +9,19 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
+from core.operators import operators
 from market.configs.PostgresConfig import PostgresConfig
+
+
+logger = logging.getLogger(__name__)
 
 
 class SQLAsyncRepository:
     model = None
 
     def __init__(self, db_config=Depends(PostgresConfig)) -> None:
+        """Initialization function gets Config object to use session maker by SQLAlchemy"""
+
         self.session_maker: sessionmaker = db_config.get_session_maker()
 
     async def create(self, fields: dict[str, Any]) -> None:
@@ -43,9 +50,9 @@ class SQLAsyncRepository:
             query = delete(self.model).where(self.model.id == _id)
             return await SQLAsyncRepository.commit(session, query)
 
-    async def get_filters(self, kws: dict[str, Any]) -> list:
+    async def get_filters(self, kwargs: dict[str, Any]) -> list:
         return [
-            eval(f'm.{k} {kws[k][1]} kws[k][0]', {'m': self.model, 'kws': kws, 'k': k}) for k in kws
+            operators[kwargs[key][1]](getattr(self.model, key), kwargs[key][0]) for key in kwargs
         ]
 
     @staticmethod
