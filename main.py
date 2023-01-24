@@ -4,8 +4,8 @@ from fastapi import FastAPI
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from auth.router import router as auth_router
-from core import setup
-from core.middlewares import handle_unknown_exception
+from common import setup
+from common.middlewares import handle_unknown_exception
 from loggs.config import LOGGING_CONFIG
 from market.routers import category, image, order, product, user
 

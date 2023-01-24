@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.engine import Row
 
-from core.repositories.repositories import SQLAsyncRepository
+from common.repositories.repositories import SQLAsyncRepository
 from market.models import (CategoryModel, ImageModel, OrderModel, ProductModel,
                            UserModel)
 

@@ -1,6 +1,6 @@
 import os
 
-from core.configs import Config
+from common.configs import Config
 from market.models import UserModel
 
 

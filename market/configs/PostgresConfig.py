@@ -3,7 +3,7 @@ import os
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from core.configs.configs import Config
+from common.configs.configs import Config
 
 
 class PostgresConfig(Config):

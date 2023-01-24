@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from core.operators import operators
+from common.operators import operators
 from market.configs.PostgresConfig import PostgresConfig
 
 logger = logging.getLogger(__name__)

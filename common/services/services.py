@@ -5,9 +5,9 @@ from pydantic import BaseModel
 from sqlalchemy.engine import Row
 from sqlalchemy.exc import IntegrityError
 
-from core.repositories.interfaces import CRUDRepositoryInterface
-from core.services.dataclasses import SignValue
-from core.services.metaclasses import ServiceMeta
+from common.repositories.interfaces import CRUDRepositoryInterface
+from common.services.dataclasses import SignValue
+from common.services.metaclasses import ServiceMeta
 from market.models import TableModel as Model
 
 

@@ -1,6 +1,6 @@
 from pydantic import Field
 
-from core.services.dataclasses import SignFloat
+from common.services.dataclasses import SignFloat
 
 
 class SignPrice(SignFloat):

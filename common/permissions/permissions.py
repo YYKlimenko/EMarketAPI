@@ -21,6 +21,7 @@ def permit_for_owner(
     else:
         raise HTTPException(401, 'You\'re don\'t have permission')
 
+
 def permit_by_secret_key(
         secret_key: str,
 ) -> True:

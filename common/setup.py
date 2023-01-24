@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from core.permissions.permissions import permit_by_secret_key
+from common.permissions.permissions import permit_by_secret_key
 from market.configs import PostgresConfig
 from scripts.create_superusers import create_superuser
 from scripts.create_tables import create_tables

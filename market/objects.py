@@ -1,6 +1,6 @@
 from fastapi import Depends
 
-from core.permissions.permissions import permit_for_admin, permit_for_owner
+from common.permissions.permissions import permit_for_admin, permit_for_owner
 from market.permissions import (permit_for_user, permit_get_order_for_owner,
                                 permit_post_order_for_owner)
 
