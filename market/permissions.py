@@ -4,7 +4,7 @@ from fastapi import Depends, HTTPException, Path
 from pydantic import BaseModel
 
 from auth.service import Authenticator
-from common.permissions.permissions import permit_for_owner
+from auth.permissions import permit_for_owner
 from market.repositories import OrderRepository
 from market.schemas import CreatingOrder
 

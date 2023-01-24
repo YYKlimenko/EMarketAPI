@@ -4,6 +4,7 @@ from typing import Any
 from fastapi import Depends, HTTPException
 
 from auth.service import Authenticator
+from auth.configs import AuthConfig
 
 
 def permit_for_admin(auth_data: dict[str, Any] = Depends(Authenticator.handle_auth)) -> bool:
@@ -24,8 +25,9 @@ def permit_for_owner(
 
 def permit_by_secret_key(
         secret_key: str,
+        config: AuthConfig = Depends()
 ) -> True:
-    if secret_key == os.getenv('SECRET_KEY'):
+    if secret_key == config.SECRET_KEY:
         return True
     else:
         raise HTTPException(401, 'You\'re don\'t have permission')
