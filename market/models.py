@@ -1,6 +1,6 @@
-from sqlalchemy import Boolean, Column, DateTime, DECIMAL, ForeignKey, Integer, String, Table
-from sqlalchemy.orm import relationship, declarative_base
-
+from sqlalchemy import (DECIMAL, Boolean, Column, DateTime, ForeignKey,
+                        Integer, String, Table)
+from sqlalchemy.orm import declarative_base, relationship
 
 TableModel = declarative_base()
 

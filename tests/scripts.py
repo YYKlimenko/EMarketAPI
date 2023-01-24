@@ -1,10 +1,11 @@
 from datetime import datetime
 
-from bcrypt import hashpw, gensalt
+from bcrypt import gensalt, hashpw
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from market.models import UserModel, TableModel, CategoryModel, ProductModel, OrderModel
+from market.models import (CategoryModel, OrderModel, ProductModel, TableModel,
+                           UserModel)
 from tests.configs import PostgresConfigTest
 
 

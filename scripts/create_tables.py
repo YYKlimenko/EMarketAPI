@@ -1,10 +1,10 @@
 from sqlalchemy import create_engine
 
 from market.configs import PostgresConfig
-from market.models import (  # noqa: F401
-    CategoryModel, ProductModel, UserModel, OrderModel,
-    ProductOrderLink, ImageModel, TableModel
-)
+from market.models import (CategoryModel, ImageModel, OrderModel,  # noqa: F401
+                           ProductModel, ProductOrderLink, TableModel,
+                           UserModel)
+
 
 def create_tables():
     engine = create_engine(f'postgresql+psycopg2://{PostgresConfig.get_url_db()}')

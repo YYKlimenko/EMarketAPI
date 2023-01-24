@@ -2,8 +2,8 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, Path
 
-from market.schemas import Category, CreatingCategory
 from market.objects import PERMIT_FOR_ADMIN
+from market.schemas import Category, CreatingCategory
 from market.services import CategoryService
 
 router = APIRouter(tags=['Categories'])

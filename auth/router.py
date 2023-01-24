@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, Body
+from fastapi import APIRouter, Body, Depends
 
 from auth.service import AuthorizationService
+
 router = APIRouter(tags=['Authorization & Authentication'])
 
 

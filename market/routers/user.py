@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Path
 
-from market.schemas import CreatingUser, User
 from market.objects import PERMIT_FOR_ADMIN, PERMIT_FOR_USER
+from market.schemas import CreatingUser, User
 from market.services import UserService
 
 router = APIRouter(tags=['Users'])

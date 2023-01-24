@@ -3,11 +3,11 @@ from typing import Any
 
 import jwt
 from bcrypt import checkpw
-from fastapi import Body, HTTPException, Security, Depends
+from fastapi import Body, Depends, HTTPException, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from auth.repositories import SQLAuthorizationRepository
 from auth.configs import AuthConfig
+from auth.repositories import SQLAuthorizationRepository
 
 
 class AuthorizationService:

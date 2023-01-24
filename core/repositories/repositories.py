@@ -12,7 +12,6 @@ from sqlalchemy.orm import sessionmaker
 from core.operators import operators
 from market.configs.PostgresConfig import PostgresConfig
 
-
 logger = logging.getLogger(__name__)
 
 

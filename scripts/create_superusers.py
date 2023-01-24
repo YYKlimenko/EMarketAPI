@@ -1,7 +1,7 @@
 import asyncio
 import datetime
 
-from bcrypt import hashpw, gensalt
+from bcrypt import gensalt, hashpw
 
 from market.configs import PostgresConfig
 from market.models import TableModel, UserModel  # noqa: F401

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, Path
 
-from market.schemas import Product, CreatingProduct
-from market.objects import PERMIT_FOR_ADMIN
 from market.dataclasses import SignPrice
+from market.objects import PERMIT_FOR_ADMIN
+from market.schemas import CreatingProduct, Product
 from market.services import ProductService
 
 router = APIRouter(tags=['Products'])

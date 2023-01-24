@@ -1,19 +1,18 @@
 from datetime import datetime
 
 from bcrypt import gensalt, hashpw
-from fastapi import UploadFile, HTTPException, Path
+from fastapi import HTTPException, Path, UploadFile
 from sqlalchemy.exc import IntegrityError
 
 from core.services.services import Service
 from market.dataclasses import SignPrice
-from market.repositories import (
-    CategoryRepository, ImageRepository, ProductRepository, UserRepository, OrderRepository
-)
+from market.repositories import (CategoryRepository, ImageRepository,
+                                 OrderRepository, ProductRepository,
+                                 UserRepository)
+from market.schemas import (Category, CreatingCategory, CreatingImage,
+                            CreatingOrder, CreatingProduct, CreatingUser,
+                            Image, Order, Product, User)
 from market.utils.image_edit import ImageEditor
-from market.schemas import (
-    CreatingCategory, CreatingProduct, CreatingOrder, CreatingUser, Order, Product, Category,
-    Image, CreatingImage, User
-)
 
 
 class CategoryService(Service):

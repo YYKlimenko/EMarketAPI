@@ -1,6 +1,6 @@
 from tests.client import client
-from tests.fixtures import get_admin_header, get_user_header, set_test_environment  # noqa: F401
-
+from tests.fixtures import (get_admin_header, get_user_header,  # noqa: F401
+                            set_test_environment)
 
 """TEST GET REQUESTS"""
 

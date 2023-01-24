@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, Form, Path
+from fastapi import APIRouter, Depends, Form, Path, UploadFile
 from sqlalchemy.engine import Row
 
 from market.objects import PERMIT_FOR_ADMIN

@@ -1,8 +1,8 @@
 from datetime import datetime
-from os import path, mkdir, remove
+from os import mkdir, path, remove
 from shutil import copyfileobj
 
-from fastapi import UploadFile, HTTPException, Depends
+from fastapi import Depends, HTTPException, UploadFile
 
 from market.configs.MediaConfig import MediaConfig
 

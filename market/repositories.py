@@ -2,7 +2,8 @@ from sqlalchemy import select
 from sqlalchemy.engine import Row
 
 from core.repositories.repositories import SQLAsyncRepository
-from market.models import ProductModel, OrderModel, CategoryModel, ImageModel, UserModel
+from market.models import (CategoryModel, ImageModel, OrderModel, ProductModel,
+                           UserModel)
 
 
 class CategoryRepository(SQLAsyncRepository):
