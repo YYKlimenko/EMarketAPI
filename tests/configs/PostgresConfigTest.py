@@ -3,4 +3,4 @@ from market.configs import PostgresConfig
 
 
 class PostgresConfigTest(PostgresConfig):
-    DB_NAME = 'market'
+    DB_NAME = 'test_market'

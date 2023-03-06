@@ -4,24 +4,23 @@ from main import app
 from market.configs.MediaConfig import MediaConfig
 from market.configs.PostgresConfig import PostgresConfig
 from tests.client import client
+from tests.configs import PostgresConfigTestDev
 from tests.configs.MediaConfigTest import MediaConfigTest
-from tests.configs.PostgresConfigTest import PostgresConfigTest
 from tests.scripts import create_tables
 
 
 @pytest.fixture(scope='session')
 def set_test_environment():
-    create_tables()
-    app.dependency_overrides[PostgresConfig] = PostgresConfigTest
-    app.dependency_overrides[MediaConfig] = MediaConfigTest
+    create_tables(PostgresConfigTestDev)
+    app.dependency_overrides[PostgresConfig] = PostgresConfigTestDev
 
 
 @pytest.fixture(scope='session')
 def get_admin_header(scope='session'):
-    token = client.post(
+    response = client.post(
         "/authentication/", json={'login': 'admin', 'password': 'admin'}
     )
-    return f"Bearer {token.json()['access_token']}"
+    return f"Bearer {response.json()['access_token']}"
 
 
 @pytest.fixture(scope='session')

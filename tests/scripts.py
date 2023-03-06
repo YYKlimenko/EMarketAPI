@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 
 from market.models import (CategoryModel, OrderModel, ProductModel, TableModel,
                            UserModel)
-from tests.configs import PostgresConfigTest
 
 
 def create_test_data(engine):
@@ -48,8 +47,8 @@ def create_test_data(engine):
         session.commit()
 
 
-def create_tables():
-    engine = create_engine(f'postgresql+psycopg2://{PostgresConfigTest.get_url_db()}')
+def create_tables(config):
+    engine = create_engine(f'postgresql+psycopg2://{config().get_url_db()}')
     TableModel.metadata.drop_all(engine)
     TableModel.metadata.create_all(engine)
     create_test_data(engine)

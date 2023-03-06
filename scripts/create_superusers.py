@@ -1,10 +1,8 @@
-import asyncio
 import datetime
 
 from bcrypt import gensalt, hashpw
 
-from market.configs import PostgresConfig
-from market.models import TableModel, UserModel  # noqa: F401
+from market.models import UserModel  # noqa: F401
 
 
 async def create_superuser(config):
@@ -19,7 +17,3 @@ async def create_superuser(config):
     )
     session.add(user)
     await session.commit()
-
-
-if __name__ == '__main__':
-    asyncio.run(create_superuser(PostgresConfig()))

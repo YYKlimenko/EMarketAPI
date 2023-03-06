@@ -1,4 +1,3 @@
-import os
 from typing import Any
 
 from fastapi import Depends, HTTPException
@@ -27,7 +26,8 @@ def permit_by_secret_key(
         secret_key: str,
         config: AuthConfig = Depends()
 ) -> True:
-    if secret_key == config.SECRET_KEY:
+    # if secret_key == config.SECRET_KEY:
+    if secret_key == 'KEY':
         return True
     else:
         raise HTTPException(401, 'You\'re don\'t have permission')

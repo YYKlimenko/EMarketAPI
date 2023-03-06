@@ -1,8 +1,12 @@
-from sqlalchemy import (DECIMAL, Boolean, Column, DateTime, ForeignKey,
+import datetime
+
+from sqlalchemy import (DECIMAL, Boolean, Column, DateTime, ForeignKey,  # type: ignore
                         Integer, String, Table)
 from sqlalchemy.orm import declarative_base, relationship
 
+
 TableModel = declarative_base()
+
 
 ProductOrderLink = Table(
     'product_order_link',
@@ -53,8 +57,8 @@ class UserModel(TableModel):
     username = Column(String(40), unique=True, nullable=False, index=True)
     number = Column(String(12), unique=True, nullable=False)
     password = Column(String(256))
-    date_registration = Column(DateTime)
-    is_admin = Column(Boolean)
+    date_registration = Column(DateTime, default=datetime.datetime.utcnow(), nullable=False)
+    is_admin = Column(Boolean, default=False, nullable=False)
 
     orders = relationship('OrderModel', back_populates='user', cascade='all, delete-orphan')
 
