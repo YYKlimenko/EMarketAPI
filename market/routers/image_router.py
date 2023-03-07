@@ -4,10 +4,8 @@ __all__ = ['image_router']
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, Form, Path, UploadFile
-from sqlalchemy.engine import Row
+from fastapi import APIRouter, Depends, UploadFile
 
-from common.filters import Filter
 from common.functions import get_fields
 from market.schemas import RetrievingImageSchema
 from market.services import ImageService
