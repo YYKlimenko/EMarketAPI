@@ -105,5 +105,4 @@ class AbstractSQLRepository(abc.ABC):
                 await session.execute(query)
             await session.commit()
         except IntegrityError as exception:
-            print(exception)
             raise HTTPException(422, 'The query is incorrect') from exception

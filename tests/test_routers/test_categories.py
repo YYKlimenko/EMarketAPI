@@ -22,6 +22,13 @@ def test_get_category(set_test_environment):  # noqa: F811
     assert response.json() == {'id': 1, 'name': 'Test category 1'}
 
 
+def test_get_nonexistent_category(set_test_environment):  # noqa: F811
+    response = client.get('/categories/3')
+
+    assert response.status_code == 200
+    assert response.json() is None
+
+
 """TEST POST REQUESTS"""
 
 
@@ -63,10 +70,10 @@ def test_post_category_with_invalid_data(set_test_environment):  # noqa: F811
 """TEST PUT REQUESTS"""
 
 
-def test_put_category_by_admin(set_test_environment):  # noqa: F811
+def test_put_category(set_test_environment):  # noqa: F811
     response = client.put(
         '/categories/3/',
-        json={'name': 'Test category 3 updated'},
+        json={'name': 'updated Test category 3'},
     )
 
     assert response.status_code == 202
@@ -77,7 +84,7 @@ def test_put_category_by_admin(set_test_environment):  # noqa: F811
     assert response.status_code == 200
     assert response.json() == {
         'id': 3,
-        'name': 'Test category 3 updated',
+        'name': 'updated Test category 3',
     }
 
 
@@ -102,7 +109,7 @@ def test_put_category_with_invalid_data(set_test_environment):  # noqa: F811
 """TEST DELETE REQUESTS"""
 
 
-def test_delete_category_by_admin(set_test_environment):  # noqa: F811
+def test_delete_category(set_test_environment):  # noqa: F811
     response = client.delete('/categories/3/',)
 
     assert response.status_code == 202

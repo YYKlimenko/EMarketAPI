@@ -5,7 +5,6 @@ __all__ = ['CategoryService', 'ImageService', 'ProductService', 'OrderService', 
 import os
 import shutil
 from http.client import HTTPException
-from typing import Any
 
 from fastapi import Depends, UploadFile
 
