@@ -13,5 +13,4 @@ class BaseRetrievingImageSchema(BaseSchema, ID):
 class RetrievingImageSchema(BaseRetrievingImageSchema):
     """Pydantic schema to view Image."""
 
-    url: str
-
+    product_id: int
