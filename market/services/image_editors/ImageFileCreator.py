@@ -1,11 +1,9 @@
-from copy import copy
 from datetime import datetime
-from os import mkdir, path, stat
-from shutil import copyfileobj
+from os import mkdir, path
 
 from PIL.ImageFile import ImageFile
-from fastapi import Depends, HTTPException, UploadFile
-from PIL import Image
+from fastapi import HTTPException, UploadFile
+from PIL import Image, UnidentifiedImageError
 
 from .ImageFileEditor import ImageFileEditor
 
@@ -26,12 +24,15 @@ class ImageFileCreator(ImageFileEditor):
         return f'{folder_name}/{datetime.utcnow()}.jpg'.replace(':', '-')
 
     async def __call__(self, temp_file: UploadFile, folder_name: str) -> str:
-        image, content_type = Image.open(temp_file.file), temp_file.content_type
-        if self.is_validate_file(image, content_type):
-            url = await self._create_url(folder_name)
-            if not path.exists(f'{self.root_url}{folder_name}'):
-                mkdir(f'{self.root_url}{folder_name}')
-            image.save(f'{self.root_url}{url}')
-        else:
-            raise HTTPException(422, detail='Image file is not correct')
-        return url
+        try:
+            image, content_type = Image.open(temp_file.file), temp_file.content_type
+            if self.is_validate_file(image, content_type):
+                url = await self._create_url(folder_name)
+                if not path.exists(f'{self.root_url}{folder_name}'):
+                    mkdir(f'{self.root_url}{folder_name}')
+                image.save(f'{self.root_url}{url}')
+            else:
+                raise UnidentifiedImageError
+            return url
+        except UnidentifiedImageError:
+            raise HTTPException(422, 'The image file is incorrect')
