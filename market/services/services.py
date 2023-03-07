@@ -31,6 +31,7 @@ class UserService(AbstractService):
         """Init a service instance."""
         super().__init__(repository=repository)
 
+
 class ProductService(AbstractService):
     """User model's service class."""
 
@@ -55,18 +56,18 @@ class ImageService(AbstractService):
             self, file: UploadFile, product_id: int, image_manager: ImageFileManager
     ) -> None:
         """Create image file and call base create method."""
-        url = await image_manager.creator(file, str(product_id))
+        url = await image_manager.create(file, str(product_id))
         try:
             await self.create({'url': url, 'product_id': product_id})
         except HTTPException:
-            await image_manager.deleter(url)
+            await image_manager.delete(url)
             raise
 
     async def delete_image(self, image_id: int, image_manager: ImageFileManager) -> None:
         """Delete image file and call base delete method."""
         if image := await self.retrieve(id=image_id):
             await self.delete(image_id)
-            await image_manager.deleter(image['url'])
+            await image_manager.delete(image['url'])
 
 
 class OrderService(AbstractService):

@@ -1,4 +1,4 @@
-from fastapi import Depends
+from fastapi import Depends, UploadFile
 
 from market.services.image_editors import ImageFileCreator, ImageFileDeleter
 
@@ -12,3 +12,9 @@ class ImageFileManager:
     ) -> None:
         self.creator = creator
         self.deleter = deleter
+
+    async def create(self, temp_file: UploadFile, folder_name: str):
+        return self.creator(temp_file, folder_name)
+
+    async def delete(self, url: str):
+        return self.deleter(url)
