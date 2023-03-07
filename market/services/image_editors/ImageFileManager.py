@@ -14,7 +14,7 @@ class ImageFileManager:
         self.deleter = deleter
 
     async def create(self, temp_file: UploadFile, folder_name: str):
-        return self.creator(temp_file, folder_name)
+        return await self.creator(temp_file, folder_name)
 
     async def delete(self, url: str):
-        return self.deleter(url)
+        return await self.deleter(url)
