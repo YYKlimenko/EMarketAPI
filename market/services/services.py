@@ -4,9 +4,8 @@ __all__ = ['CategoryService', 'ImageService', 'ProductService', 'OrderService', 
 
 import os
 import shutil
-from http.client import HTTPException
 
-from fastapi import Depends, UploadFile
+from fastapi import Depends, UploadFile, HTTPException
 
 from common.services import AbstractService
 from market.configs import MediaConfig
@@ -59,6 +58,7 @@ class ImageService(AbstractService):
         try:
             await self.create({'url': url, 'product_id': product_id})
         except HTTPException:
+
             await image_manager.delete(url)
             raise
 
