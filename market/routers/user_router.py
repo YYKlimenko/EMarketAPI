@@ -3,6 +3,8 @@ from typing import Any
 from fastapi import APIRouter, Depends, Path
 
 from common.functions import get_fields
+from common.permissions import permit_for_admin, permit_for_owner
+from market.permissions import permit_for_user
 # from market.objects import PERMIT_FOR_ADMIN, PERMIT_FOR_USER
 from market.schemas import CreatingUserSchema, RetrievingUserSchema, UpdatingUserSchema
 from market.services import UserService
@@ -14,7 +16,7 @@ user_router = APIRouter(prefix='/users', tags=['Users'])
     '/',
     status_code=200,
     description='Get a list of users',
-    # dependencies=[PERMIT_FOR_ADMIN],
+    dependencies=[Depends(permit_for_admin)],
     response_model=list[RetrievingUserSchema]
 )
 async def get_users(is_admin:  bool | None = None, service: UserService = Depends()) -> list[dict[str, Any]]:
@@ -26,7 +28,7 @@ async def get_users(is_admin:  bool | None = None, service: UserService = Depend
     '/{user_id}/',
     status_code=200,
     description='Get the user',
-    # dependencies=[PERMIT_FOR_USER],
+    dependencies=[Depends(permit_for_owner)],
     response_model=RetrievingUserSchema | None
 )
 async def get_user(user_id: int, service: UserService = Depends()) -> dict[str, Any] | None:
@@ -37,7 +39,7 @@ async def get_user(user_id: int, service: UserService = Depends()) -> dict[str, 
     '/{user_id}/',
     status_code=202,
     description='Delete the user',
-    # dependencies=[PERMIT_FOR_USER],
+    dependencies=[Depends(permit_for_owner)],
 )
 async def delete_user(user_id: int, service: UserService = Depends()) -> None:
     return await service.delete(user_id)
@@ -52,7 +54,7 @@ async def registrate_user(user: CreatingUserSchema, service: UserService = Depen
     '/{user_id}/',
     status_code=202,
     description='Change user data',
-    # dependencies=[PERMIT_FOR_USER]
+    dependencies=[Depends(permit_for_owner)],
 )
 async def change_user_data(data: UpdatingUserSchema, user_id: int, service: UserService = Depends()) -> None:
     return await service.update(user_id, get_fields(**data.dict()))

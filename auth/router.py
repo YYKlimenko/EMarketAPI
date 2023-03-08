@@ -1,6 +1,12 @@
+import logging
+
 from fastapi import APIRouter, Body, Depends
 
 from auth.service import AuthorizationService
+
+
+logger = logging.getLogger(__name__)
+
 
 router = APIRouter(tags=['Authorization & Authentication'])
 
@@ -9,6 +15,8 @@ router = APIRouter(tags=['Authorization & Authentication'])
 async def authorize_user(
         login: str = Body(...),
         password: str = Body(...),
-        service=Depends(AuthorizationService)
+        service=Depends(AuthorizationService),
 ) -> dict[str, str]:
+    print("===================")
+    logger.info('=============================')
     return await service.authorize(login, password)

@@ -35,7 +35,8 @@ def test_get_nonexistent_category(set_test_environment):  # noqa: F811
 def test_post_category_by_admin(set_test_environment, get_admin_header):  # noqa: F811
     response = client.post(
         '/categories/',
-        json={'name': 'Test category 3'}
+        json={'name': 'Test category 3'},
+        headers={'Authorization': get_admin_header},
     )
 
     assert response.status_code == 201
@@ -50,19 +51,20 @@ def test_post_category_by_admin(set_test_environment, get_admin_header):  # noqa
     }
 
 
-# def test_post_category_by_user(set_test_environment):  # noqa: F811
-#     response = client.post(
-#         '/categories/',
-#         json={'name': 'Test category 3'},
-#         # headers={'Authorization': get_user_header}
-#     )
-#     assert response.status_code == 401
+def test_post_category_by_user(set_test_environment, get_user_header):  # noqa: F811
+    response = client.post(
+        '/categories/',
+        json={'name': 'Test category 3'},
+        headers={'Authorization': get_user_header}
+    )
+    assert response.status_code == 401
 
 
-def test_post_category_with_invalid_data(set_test_environment):  # noqa: F811
+def test_post_category_with_invalid_data(set_test_environment, get_admin_header):  # noqa: F811
     response = client.post(
         '/categories/',
         json={'username': 213123},
+        headers={'Authorization': get_admin_header},
     )
     assert response.status_code == 422
 
@@ -70,10 +72,11 @@ def test_post_category_with_invalid_data(set_test_environment):  # noqa: F811
 """TEST PUT REQUESTS"""
 
 
-def test_put_category(set_test_environment):  # noqa: F811
+def test_put_category(set_test_environment, get_admin_header):  # noqa: F811
     response = client.put(
         '/categories/3/',
         json={'name': 'updated Test category 3'},
+        headers={'Authorization': get_admin_header},
     )
 
     assert response.status_code == 202
@@ -88,19 +91,21 @@ def test_put_category(set_test_environment):  # noqa: F811
     }
 
 
-# def test_put_category_by_user(set_test_environment):  # noqa: F811
-#     response = client.put(
-#         '/categories/2/',
-#         json={'username': 'user_3_updated_again'},
-#     )
-#
-#     assert response.status_code == 401
+def test_put_category_by_user(set_test_environment, get_user_header):  # noqa: F811
+    response = client.put(
+        '/categories/2/',
+        json={'username': 'user_3_updated_again'},
+        headers={'Authorization': get_user_header},
+    )
+
+    assert response.status_code == 401
 
 
-def test_put_category_with_invalid_data(set_test_environment):  # noqa: F811
+def test_put_category_with_invalid_data(set_test_environment, get_admin_header):  # noqa: F811
     response = client.put(
         '/categories/2/',
         json={'number': '88000965599'},
+        headers={'Authorization': get_admin_header},
     )
 
     assert response.status_code == 422
@@ -109,18 +114,18 @@ def test_put_category_with_invalid_data(set_test_environment):  # noqa: F811
 """TEST DELETE REQUESTS"""
 
 
-def test_delete_category(set_test_environment):  # noqa: F811
-    response = client.delete('/categories/3/',)
+def test_delete_category(set_test_environment, get_admin_header):  # noqa: F811
+    response = client.delete('/categories/3/', headers={'Authorization': get_admin_header})
 
     assert response.status_code == 202
     assert response.json() is None
 
-    response = client.get('/categories/3/', headers={})
+    response = client.get('/categories/3/', headers={'Authorization': get_admin_header},)
 
     assert response.status_code == 200
     assert response.json() is None
 
 
-# def test_delete_category_by_user(set_test_environment):  # noqa: F811
-#     response = client.delete('/categories/3/', headers={})
-#     assert response.status_code == 401
+def test_delete_category_by_user(set_test_environment, get_user_header):  # noqa: F811
+    response = client.delete('/categories/3/', headers={'Authorization': get_user_header})
+    assert response.status_code == 401

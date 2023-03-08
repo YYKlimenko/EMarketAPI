@@ -47,7 +47,7 @@ async def post_order(order: CreatingOrderSchema, service: OrderService = Depends
     '/{order_id}/',
     status_code=202,
     description='Delete the order',
-    dependencies=[Depends(permit_post_order_for_owner)],
+    dependencies=[Depends(permit_for_owner)],
 )
 async def delete_order(order_id: int, service: OrderService = Depends()) -> None:
     return await service.delete(order_id)

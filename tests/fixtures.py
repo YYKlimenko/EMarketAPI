@@ -1,5 +1,8 @@
+import logging
+
 import pytest
 
+from auth.configs import AuthConfig, AuthConfigDev
 from main import app
 from market.configs.MediaConfig import MediaConfig
 from market.configs.PostgresConfig import PostgresConfig
@@ -14,6 +17,7 @@ def set_test_environment():
     create_tables(PostgresConfigTestDev)
     app.dependency_overrides[PostgresConfig] = PostgresConfigTestDev
     app.dependency_overrides[MediaConfig] = MediaConfigTest
+    app.dependency_overrides[AuthConfig] = AuthConfigDev
 
 
 @pytest.fixture(scope='session')
