@@ -9,6 +9,7 @@ __all__ = [
     'UserSQLRepository'
 ]
 
+import operator
 from typing import Type, Any
 
 from fastapi import Depends
@@ -62,6 +63,14 @@ class ProductSQLRepository(SQLRepository):
                             FROM products as product 
                             LEFT JOIN images as image ON product.id = image.product_id """  # noqa W291
 
+        OPERATORS = {
+            operator.eq: '=',
+            operator.lt: '<',
+            operator.gt: '>',
+            operator.le: '<=',
+            operator.ge: '>='
+        }
+
         if filter_fields:
             count_kwargs = 0
             filters = []
@@ -71,14 +80,14 @@ class ProductSQLRepository(SQLRepository):
                     word = 'WHERE' if count_kwargs == 0 else 'AND'
 
                     if kwarg == 'id':
-                        filters.append(f"""{word} {kwarg} = '{filter_fields[kwarg]}'""")
+                        filters.append(f"""{word} product.{kwarg} = {filter_fields[kwarg]}""")
 
                     elif kwarg == 'category_id':
                         filters.append(f"""{word} {kwarg} = {filter_fields[kwarg]}""")
 
                     elif kwarg == 'price':
-                        symbol = '=' if filter_fields[kwarg][0] == '==' else filter_fields[kwarg][0]
-                        filters.append(f"""{word} {kwarg} {symbol} {filter_fields[kwarg][1]}""")
+                        symbol = OPERATORS[filter_fields[kwarg].sign]
+                        filters.append(f"""{word} {kwarg} {symbol} {filter_fields[kwarg].value}""")
 
                     count_kwargs += 1
             raw_query = ' '.join([raw_query, *filters, ';'])
@@ -135,12 +144,13 @@ class OrderSQLRepository(SQLRepository):
             products.price, products.category_id, products.constitution
             FROM orders 
             JOIN product_order_link ON orders.id = product_order_link.order_id
-            JOIN products ON products.id = product_order_link.product_id 
+            JOIN products ON products.id = product_order_link.product_id
             """
             for field in ('user_id', 'id'):
                 if i := filter_fields.get(field):
                     query = ''.join([query, f' WHERE orders.{field} = {i}'])
             orders = dict()
+            products = dict()
             rows = await session.execute(query)
             for row in rows:
                 if row.id not in orders:

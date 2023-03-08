@@ -4,6 +4,7 @@ __all__ = ['CreatingOrderSchema', 'RetrievingOrderSchema']
 
 from . import RetrievingProductSchema
 from .base_schemas import BaseSchema, ID
+from .product_schemas import BaseRetrievingProductSchema
 
 
 class CreatingOrderSchema(BaseSchema):
@@ -16,4 +17,4 @@ class CreatingOrderSchema(BaseSchema):
 class RetrievingOrderSchema(ID):
     """Pydantic schema to get the Order instance from DB."""
     user_id: int
-    products: list[RetrievingProductSchema]
+    products: list[BaseRetrievingProductSchema]

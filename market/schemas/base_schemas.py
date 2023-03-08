@@ -1,7 +1,8 @@
 """Base schemas to create other schemas."""
 
-__all__ = ['BaseSchema', 'ID']
+__all__ = ['BaseSchema', 'BaseUpdatingSchema', 'ID']
 
+from pydantic import root_validator, ValidationError
 from pydantic.main import BaseModel
 
 
@@ -16,3 +17,13 @@ class ID(BaseModel):
     """The id field. """
 
     id: int
+
+
+class BaseUpdatingSchema(BaseSchema):
+
+    @root_validator
+    def is_not_empty(cls, values):
+        if any(values.values()):
+            return values
+        raise ValidationError('The schema can\'t be empty')
+

@@ -13,6 +13,7 @@ from tests.scripts import create_tables
 def set_test_environment():
     create_tables(PostgresConfigTestDev)
     app.dependency_overrides[PostgresConfig] = PostgresConfigTestDev
+    app.dependency_overrides[MediaConfig] = MediaConfigTest
 
 
 @pytest.fixture(scope='session')

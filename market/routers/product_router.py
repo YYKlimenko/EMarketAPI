@@ -36,10 +36,10 @@ async def get_products(
     '/{product_id}/',
     status_code=200,
     description='Get the product by id',
-    response_model=RetrievingProductSchema,
+    response_model=RetrievingProductSchema | None,
 )
 async def get_product(product_id: int, service: ProductService = Depends()) -> dict[str, Any]:
-    return await service.retrieve(**get_fields(product_id=product_id))
+    return await service.retrieve(**get_fields(id=product_id))
 
 
 @product_router.post(

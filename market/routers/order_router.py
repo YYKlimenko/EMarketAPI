@@ -23,7 +23,7 @@ async def get_orders(user_id: int | None = None, service: OrderService = Depends
     '/{order_id}/',
     status_code=200,
     description='Get the order',
-    response_model=RetrievingOrderSchema,
+    response_model=RetrievingOrderSchema | None,
 )
 async def get_order(order_id: int, service: OrderService = Depends()) -> dict[str, Any]:
     return await service.retrieve(id=order_id)
