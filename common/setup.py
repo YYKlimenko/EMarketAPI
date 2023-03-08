@@ -1,4 +1,4 @@
-from auth.permissions import permit_by_secret_key
+from common.permissions import permit_by_secret_key
 from fastapi import APIRouter, Depends
 from market.configs import PostgresConfig, PostgresConfigDev
 from scripts.create_superusers import create_superuser

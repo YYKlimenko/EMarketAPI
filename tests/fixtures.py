@@ -17,7 +17,7 @@ def set_test_environment():
 
 
 @pytest.fixture(scope='session')
-def get_admin_header(scope='session'):
+def get_admin_header():
     response = client.post(
         "/authentication/", json={'login': 'admin', 'password': 'admin'}
     )
@@ -25,7 +25,7 @@ def get_admin_header(scope='session'):
 
 
 @pytest.fixture(scope='session')
-def get_user_header(scope='session'):
+def get_user_header():
     token = client.post(
         "/authentication/", json={'login': 'user', 'password': 'user'}
     )

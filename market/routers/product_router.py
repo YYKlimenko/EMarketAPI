@@ -6,6 +6,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, Query
 
+from common.permissions import permit_for_admin
 from common.filters import FloatFilterParser
 
 from common.functions import get_fields
@@ -46,6 +47,7 @@ async def get_product(product_id: int, service: ProductService = Depends()) -> d
     '/',
     status_code=201,
     description='Create a new product',
+    dependencies=[Depends(permit_for_admin)],
 )
 async def post_product(product: CreatingProductSchema, service: ProductService = Depends()) -> None:
     return await service.create(product.dict())
@@ -55,6 +57,7 @@ async def post_product(product: CreatingProductSchema, service: ProductService =
     '/{product_id}/',
     status_code=202,
     description='Update the product',
+    dependencies=[Depends(permit_for_admin)],
 )
 async def put_product(product_id: int, product: UpdatingProductSchema, service: ProductService = Depends()) -> None:
     return await service.update(product_id, get_fields(**product.dict()))
@@ -64,6 +67,7 @@ async def put_product(product_id: int, product: UpdatingProductSchema, service: 
     '/{product_id}/',
     status_code=202,
     description='Delete the product',
+    dependencies=[Depends(permit_for_admin)],
 )
 async def delete_product(product_id: int, service: ProductService = Depends()) -> None:
     return await service.delete(product_id)

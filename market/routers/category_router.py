@@ -6,7 +6,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends
 
-from auth.permissions import permit_for_admin  # type: ignore
+from common.permissions import permit_for_admin  # type: ignore
 from common.filters import Filter  # type: ignore
 from market.schemas import RetrievingCategorySchema, CreatingCategorySchema  # type: ignore
 from market.services import CategoryService
@@ -40,7 +40,7 @@ async def get_category(category_id: int, service: CategoryService = Depends()) -
     '/',
     status_code=201,
     description='Create a new category',
-    # dependencies=[Depends(permit_for_admin)]
+    dependencies=[Depends(permit_for_admin)],
 )
 async def post_category(category: CreatingCategorySchema, service: CategoryService = Depends()) -> None:
     return await service.create(category.dict())
@@ -50,7 +50,7 @@ async def post_category(category: CreatingCategorySchema, service: CategoryServi
     '/{category_id}/',
     status_code=202,
     description='The category is updated',
-    # dependencies=[Depends(permit_for_admin)]
+    dependencies=[Depends(permit_for_admin)]
 )
 async def put_category(
         category: CreatingCategorySchema, category_id: int, service: CategoryService = Depends()
@@ -62,7 +62,7 @@ async def put_category(
     '/{category_id}/',
     status_code=202,
     description='The category is deleted',
-    # dependencies=[Depends(permit_for_admin)]
+    dependencies=[Depends(permit_for_admin)]
 )
 async def delete_category(category_id: int, service: CategoryService = Depends()) -> None:
     return await service.delete(category_id)

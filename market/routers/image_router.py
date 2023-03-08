@@ -6,6 +6,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, UploadFile
 
+from common.permissions import permit_for_admin
 from common.functions import get_fields
 from market.schemas import RetrievingImageSchema
 from market.services import ImageService
@@ -38,7 +39,7 @@ async def get_image(image_id: int, service: ImageService = Depends()) -> dict[st
     '/',
     status_code=201,
     description='Create the image',
-    # dependencies=[PERMIT_FOR_ADMIN]
+    dependencies=[Depends(permit_for_admin)],
 )
 async def post_image(
         file: UploadFile,
@@ -53,7 +54,7 @@ async def post_image(
     '/{image_id}/',
     status_code=202,
     description='Delete the image',
-    # dependencies=[PERMIT_FOR_ADMIN]
+    dependencies=[Depends(permit_for_admin)],
 )
 async def delete_image(
         image_id: int,

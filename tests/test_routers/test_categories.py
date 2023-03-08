@@ -32,10 +32,10 @@ def test_get_nonexistent_category(set_test_environment):  # noqa: F811
 """TEST POST REQUESTS"""
 
 
-def test_post_category_by_admin(set_test_environment):  # noqa: F811
+def test_post_category_by_admin(set_test_environment, get_admin_header):  # noqa: F811
     response = client.post(
         '/categories/',
-        json={'name': 'Test category 3'},
+        json={'name': 'Test category 3'}
     )
 
     assert response.status_code == 201
